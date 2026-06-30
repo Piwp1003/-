@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谷雨</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #ffffff; color: #0f1419; }
+        .layout-container { display: flex; justify-content: center; max-width: 1280px; margin: 0 auto; min-height: 100vh; }
+        * { box-sizing: border-box; }
+        
+        /* 核心：所有图标统一的蓝色线条简约风格 */
+        svg.blue-line-icon { fill: none !important; stroke: #1d9bf0 !important; stroke-width: 2px !important; stroke-linecap: round !important; stroke-linejoin: round !important; }
+
+        .sidebar-left { width: 275px; padding: 0 12px; display: flex; flex-direction: column; }
+        .sidebar-content { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+        .logo { padding: 12px; font-size: 24px; cursor: pointer; color: #1d9bf0; }
+        .nav-menu { display: flex; flex-direction: column; margin-top: 10px; }
+        .nav-item { display: flex; align-items: center; padding: 12px; margin: 4px 0; text-decoration: none; color: #0f1419; font-size: 20px; border-radius: 9999px; transition: background-color 0.2s; width: fit-content; padding-right: 24px; cursor: pointer; position: relative; }
+        .nav-item:hover { background-color: rgba(29, 155, 240, 0.1); }
+        .nav-item.active { font-weight: bold; color: #1d9bf0; }
+        .nav-icon { width: 26px; height: 26px; margin-right: 16px; }
+        .badge { position: absolute; top: 8px; left: 24px; background-color: #1d9bf0; color: white; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 9999px; border: 2px solid white; display: none; }
+        .user-profile-mini { margin-top: auto; margin-bottom: 20px; display: flex; align-items: center; padding: 10px; border-radius: 9999px; background: #f7f9f9; cursor: pointer; transition: 0.2s; flex-shrink: 0; border: 1px solid transparent; }
+        .user-profile-mini:hover { background-color: #e7e7e8; border-color: #1d9bf0; }
+        .user-info { margin-left: 10px; flex-grow: 1; overflow: hidden; }
+        .user-name { font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 4px; }
+        .user-handle { color: #536471; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1d9bf0; font-weight: bold; flex-shrink: 0; background-color: white; border: 2px solid #1d9bf0; background-size: cover; background-position: center; cursor: pointer; }
+        .main-content { width: 600px; border-left: 1px solid #eff3f4; border-right: 1px solid #eff3f4; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+        .top-tabs { display: flex; border-bottom: 1px solid #eff3f4; position: sticky; top: 0; background-color: rgba(255,255,255,0.85); backdrop-filter: blur(12px); z-index: 10; flex-shrink: 0; }
+        .tab { flex: 1; text-align: center; padding: 15px 0; font-weight: bold; color: #536471; cursor: pointer; transition: background-color 0.2s; position: relative; }
+        .tab:hover { background-color: rgba(29, 155, 240, 0.1); }
+        .tab.active { color: #1d9bf0; }
+        .tab.active::after { content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 4px; background-color: #1d9bf0; border-radius: 9999px; }
+        .header-title { padding: 10px 20px; font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; background-color: rgba(255,255,255,0.85); backdrop-filter: blur(12px); z-index: 10; flex-shrink: 0; }
+        .back-btn { cursor: pointer; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; transition: 0.2s; margin-left:-10px; color: #1d9bf0;}
+        .back-btn:hover { background-color: rgba(29, 155, 240, 0.1); }
+        .user-post-area { display: flex; flex-direction: column; gap: 10px; padding: 15px 20px; border-bottom: 1px solid #eff3f4; }
+        .user-post-input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .user-post-area input { flex-grow: 1; border: none; outline: none; font-size: 18px; padding: 10px 0; color: #1d9bf0; }
+        .btn-post { background-color: white; color: #1d9bf0; border: 2px solid #1d9bf0; padding: 8px 20px; border-radius: 9999px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.2s; flex-shrink:0; }
+        .btn-post:hover { background-color: #1d9bf0; color: white; }
+        .post-placeholder { display: flex; padding: 16px; border-bottom: 1px solid #eff3f4; gap: 12px; transition: background-color 0.2s; cursor: pointer; position: relative; }
+        .post-placeholder:hover { background-color: rgba(29, 155, 240, 0.03); }
+        .post-content { flex-grow: 1; min-width: 0; }
+        .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .post-header-info { display: flex; align-items: center; gap: 5px; overflow: hidden; white-space: nowrap; }
+        .post-name { font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 4px; }
+        .post-name:hover { color: #1d9bf0; }
+        .post-handle { color: #536471; font-size: 15px; text-overflow: ellipsis; overflow: hidden; }
+        .post-body { margin-bottom: 4px; font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+        .post-body:hover { background-color: rgba(29,155,240,0.08); border-radius: 4px; }
+        .clickable-tag, .mention-tag { color: #1d9bf0; cursor: pointer; }
+        .clickable-tag:hover, .mention-tag:hover { text-decoration: underline; }
+        .post-media { margin-top: 10px; border-radius: 16px; overflow: hidden; border: 1px solid #1d9bf0; }
+        .post-media img { width: 100%; display: block; object-fit: cover; max-height: 400px; }
+        .post-location { color: #1d9bf0; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        .post-footer { display: flex; justify-content: space-between; align-items: center; color: #536471; font-size: 13px; margin-top: 10px; }
+        .post-stats-group { display: flex; gap: 20px; flex-grow: 1; justify-content: flex-end; max-width: 380px;}
+        .stat-item { display: flex; align-items: center; gap: 5px; cursor: pointer; transition: color 0.2s; }
+        .stat-item:hover { color: #1d9bf0; }
+        .liked-stat { color: #1d9bf0 !important; }
+        .stat-icon { width: 18px; height: 18px; }
+        .time-updater { display: flex; align-items: center; gap: 4px; min-width: 60px;}
+        .replies-container { margin-top: 10px; border-left: 2px solid #1d9bf0; padding-left: 15px; }
+        .reply-item { margin-top: 12px; display: flex; gap: 8px; }
+        .reply-content { font-size: 14px; background: white; padding: 8px 12px; border-radius: 12px; border-top-left-radius: 0; width: 100%; border: 1px solid #1d9bf0; }
+        .reply-name { font-weight: bold; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; }
+        .reply-avatar-link { cursor: pointer; flex-shrink: 0; }
+        .reply-name-link { cursor: pointer; }
+        .reply-name-link:hover { color: #1d9bf0; }
+        .reply-like-btn { background: none; border: none; cursor: pointer; color: #536471; font-size: 12px; display: flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 9999px; transition: 0.2s; }
+        .reply-like-btn:hover { color: #1d9bf0; background: rgba(29, 155, 240, 0.1); }
+        .reply-like-btn.liked { color: #1d9bf0; }
+        .inline-reply-area { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; padding-left: 40px; }
+        .inline-reply-row { display: flex; gap: 8px; width: 100%; align-items: center; }
+        .inline-reply-area input { flex-grow: 1; border: 1px solid #1d9bf0; border-radius: 9999px; outline: none; font-size: 14px; padding: 6px 14px; background: white; color: #1d9bf0; }
+        .inline-reply-area button { background: white; color: #1d9bf0; border: 2px solid #1d9bf0; border-radius: 9999px; padding: 4px 14px; font-weight: bold; font-size: 13px; cursor: pointer; white-space: nowrap; }
+        .inline-reply-area button:hover { background: #1d9bf0; color: white; }
+        .comment-input-area { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; border-top: 1px solid #1d9bf0; padding-top: 15px; }
+        .comment-input-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+        .comment-input-area input { flex-grow: 1; border: none; outline: none; font-size: 15px; padding: 10px; color: #1d9bf0; }
+        .verified-badge { width: 1.2em; height: 1.2em; flex-shrink: 0; }
+        .follow-btn { background-color: white; color: #1d9bf0; border: 2px solid #1d9bf0; padding: 4px 16px; border-radius: 9999px; font-weight: bold; font-size: 14px; cursor: pointer; flex-shrink: 0; }
+        .follow-btn.following { background-color: #1d9bf0; color: white; }
+        .post-delete-btn { display: none; background: none; border: none; color: #1d9bf0; cursor: pointer; font-size: 16px; padding: 4px 8px; border-radius: 50%; margin-left: 8px; transition: 0.2s;}
+        .post-placeholder:hover .post-delete-btn { display: inline-block; }
+        .post-delete-btn:hover { background: rgba(29, 155, 240, 0.1); }
+        .profile-header-info { display: flex; flex-direction: column; line-height: 1.2; }
+        .profile-header-name { font-weight: bold; font-size: 20px; }
+        .profile-header-meta { font-size: 13px; color: #1d9bf0; }
+        .profile-banner { height: 200px; background-color: #f0f8ff; background-size: cover; background-position: center; border-bottom: 2px solid #1d9bf0;}
+        .profile-details { padding: 15px; position: relative; border-bottom: 1px solid #eff3f4; }
+        .profile-avatar-large { width: 134px; height: 134px; border: 4px solid white; border-radius: 50%; position: absolute; top: -70px; display: flex; align-items: center; justify-content: center; font-size: 60px; background-color: white; background-size: cover; background-position: center; box-shadow: 0 0 0 2px #1d9bf0; color: #1d9bf0; }
+        .profile-actions { display: flex; justify-content: flex-end; margin-bottom: 10px; height: 40px; }
+        .profile-name-section { margin-top: 10px; margin-bottom: 15px; }
+        .profile-bio { font-size: 15px; line-height: 1.5; margin-bottom: 15px; white-space: pre-wrap; }
+        .profile-meta-info { display: flex; flex-wrap: wrap; gap: 15px; color: #536471; font-size: 14px; margin-bottom: 15px; }
+        .profile-meta-item { display: flex; align-items: center; gap: 4px; }
+        .profile-stats { display: flex; gap: 20px; font-size: 14px; }
+        .following-row-container { display: flex; gap: 16px; padding: 20px; overflow-x: auto; flex-wrap: nowrap; }
+        .following-card { min-width: 160px; background: white; border: 2px solid #1d9bf0; border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .following-card:hover { background: rgba(29, 155, 240, 0.05); }
+        .following-card .avatar { margin: 0 auto 10px auto; width: 60px; height: 60px; font-size: 30px; }
+        .custom-context-menu { display: none; position: absolute; z-index: 2000; background: white; border: 2px solid #1d9bf0; border-radius: 12px; box-shadow: 0 4px 12px rgba(29,155,240,0.15); padding: 8px; flex-direction: column; gap: 8px; min-width: 150px; }
+        .context-btn { background-color: white; color: #1d9bf0; border: 1px solid #1d9bf0; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; font-size: 14px; transition: 0.2s; }
+        .context-btn:hover { background-color: rgba(29, 155, 240, 0.1); }
+        .notification-item { display: flex; padding: 16px; border-bottom: 1px solid #eff3f4; gap: 12px; cursor: pointer; transition: background-color 0.2s;}
+        .notification-item:hover { background-color: rgba(29, 155, 240, 0.05); }
+        .notif-icon { width: 30px; height: 30px; flex-shrink: 0; }
+        .sidebar-right { width: 350px; padding-left: 30px; }
+        .sidebar-right-content { position: sticky; top: 0; padding-top: 10px; }
+        .search-box { background: white; border: 2px solid #1d9bf0; border-radius:9999px; display:flex; align-items:center; padding:10px 20px; margin-bottom:16px; }
+        .search-box input { border:none; background:transparent; outline:none; width:100%; font-size:15px; margin-left:10px; color: #1d9bf0; }
+        .info-card { background-color: white; border: 2px solid #1d9bf0; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .info-card h3 { margin: 0 0 15px 0; font-size: 20px; color: #1d9bf0; }
+        .trend-item { padding: 10px 0; cursor: pointer; transition: background-color 0.2s; border-radius: 8px; padding-left: 8px; margin-left: -8px;}
+        .trend-item:hover { background-color: rgba(29, 155, 240, 0.05); }
+        .trend-title { font-weight: bold; font-size: 15px; color: #0f1419; }
+        .trend-meta { font-size: 13px; color: #1d9bf0; margin-top: 3px; }
+        .trend-edit-input { width: 100%; padding: 4px 8px; border: 2px solid #1d9bf0; border-radius: 4px; font-size: 15px; font-weight: bold; outline: none; }
+        .add-trend-box { display: flex; gap: 8px; margin-top: 15px; }
+        .add-trend-box input { flex-grow: 1; padding: 8px; border: 1px solid #1d9bf0; border-radius: 4px; font-size: 14px; }
+        .add-trend-box button { background-color: white; color: #1d9bf0; border: 1px solid #1d9bf0; border-radius: 4px; padding: 0 15px; font-weight: bold; cursor: pointer; }
+        
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .modal-box { background: white; width: 500px; padding: 24px; border-radius: 16px; border: 2px solid #1d9bf0; box-shadow: 0 10px 30px rgba(29, 155, 240, 0.1); max-height: 85vh; overflow-y: auto; }
+        .modal-box h2 { margin-top: 0; margin-bottom: 5px; color: #1d9bf0; }
+        .form-hint { color: #536471; font-size: 13px; margin-bottom: 15px; background: rgba(29, 155, 240, 0.05); padding: 10px; border-radius: 8px; border-left: 4px solid #1d9bf0;}
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-group { margin-bottom: 12px; }
+        .input-group.full-width { grid-column: 1 / -1; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; color: #1d9bf0; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 8px 10px; border: 1px solid #1d9bf0; border-radius: 4px; box-sizing: border-box; font-size: 14px; color: #0f1419; outline: none; }
+        .freq-group { display: flex; align-items: center; gap: 5px; }
+        .freq-group input { width: 60px !important; }
+        .btn-primary { background-color: #1d9bf0; color: white; border: none; padding: 12px 20px; border-radius: 9999px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px; font-size: 16px; }
+        .btn-secondary { background-color: white; color: #1d9bf0; border: 2px solid #1d9bf0; padding: 10px 20px; border-radius: 9999px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; }
+        .btn-cancel { background-color: transparent; color: #1d9bf0; border: none; padding: 12px 20px; border-radius: 9999px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; text-decoration: underline; }
+        .btn-edit-small { background-color: white; color: #1d9bf0; border: 1px solid #1d9bf0; padding: 6px 12px; border-radius: 9999px; font-weight: bold; font-size: 13px; cursor: pointer; flex-shrink: 0; transition: 0.2s;}
+        .btn-edit-small:hover { background: #1d9bf0; color: white; }
+        .center-char-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eff3f4; gap: 12px; }
+        .char-info-wrapper { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .empty-state { text-align: center; color: #1d9bf0; padding: 40px 20px; line-height: 1.6; }
+
+        /* ===== 角色分组 ===== */
+        .group-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 4px; margin-bottom: 4px; border-bottom: 1px solid #eff3f4; }
+        .group-label { font-size: 12px; font-weight: bold; color: #1d9bf0; text-transform: uppercase; letter-spacing: 0.05em; }
+        .group-tag { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: bold; color: white; background: #1d9bf0; margin-left: 6px; cursor: pointer; }
+        .group-tag:hover { opacity: 0.8; }
+        .group-section { margin-bottom: 8px; }
+
+        /* ===== 记忆总结卡片 ===== */
+        .memory-badge { display: inline-block; background: white; color: #1d9bf0; border: 1px solid #1d9bf0; border-radius: 9999px; font-size: 11px; padding: 1px 7px; margin-left: 6px; cursor: pointer; }
+        .memory-edit-area { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 13px; padding: 10px; border: 1px solid #1d9bf0; border-radius: 8px; background: white; min-height: 100px; resize: vertical; color: #0f1419; }
+        .memory-post-list { max-height: 200px; overflow-y: auto; margin-top: 8px; border: 1px solid #1d9bf0; border-radius: 8px; padding: 8px; font-size: 13px; }
+
+        /* ===== 世界书面板 ===== */
+        .wb-card { min-width: 180px; max-width: 180px; background: white; border: 2px solid #1d9bf0; border-radius: 12px; padding: 12px; position: relative; display: flex; flex-direction: column; flex-shrink: 0; }
+        .wb-card.active { background: rgba(29, 155, 240, 0.1); }
+        .wb-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #1d9bf0;}
+        .wb-content { font-size: 12px; color: #536471; flex-grow: 1; overflow-y: auto; max-height: 80px; margin-bottom: 8px;}
+        .wb-toggle { background: white; color: #1d9bf0; border: 1px solid #1d9bf0; padding: 4px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;}
+        .wb-toggle.off { color: #536471; border-color: #536471; }
+
+        /* ===== 表情库 ===== */
+        .emo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; max-height: 350px; overflow-y: auto; }
+        .emo-item { position: relative; width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid #1d9bf0; cursor: pointer; background: white;}
+        .emo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .emo-del-btn { position: absolute; top: 2px; right: 2px; background: white; color: #1d9bf0; border: 1px solid #1d9bf0; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; z-index: 5;}
+        .emo-preview-box { position: relative; display: inline-block; margin-top: 8px; padding-left: 50px; width: 100%; }
+        .emo-preview-img { height: 80px; border-radius: 8px; border: 2px solid #1d9bf0; }
+        .emo-clear-btn { position: absolute; top: -6px; left: 38px; background: white; color: #1d9bf0; border: 1px solid #1d9bf0; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+
+        /* ===== 小报与生成弹窗 ===== */
+        .newspaper-modal { width: 560px; }
+        .char-checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 16px; max-height: 200px; overflow-y: auto; }
+        .char-checkbox-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #1d9bf0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .char-checkbox-item:hover { background: rgba(29, 155, 240, 0.05); }
+        .char-checkbox-item input[type=checkbox] { accent-color: #1d9bf0; width: 16px; height: 16px; flex-shrink: 0; }
+        .generating-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #536471; border-bottom: 1px solid #eff3f4; }
+
+        /* ===== 仿微信聊天视图 ===== */
+        #view-chat { display: flex; flex-direction: column; height: 100vh; background: #ededed; }
+        .chat-char-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 15px; border-bottom: 1px solid #e0e0e0; flex-shrink: 0; background: white; }
+        .chat-char-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; opacity: 0.6; transition: 0.2s; min-width: 60px; flex-shrink: 0; }
+        .chat-char-item.active { opacity: 1; color: #1d9bf0; font-weight: bold; }
+        .chat-char-item .avatar { margin-bottom: 4px; }
+        .chat-messages { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex-grow: 1; overflow-y: auto; }
+        .chat-msg-row { display: flex; gap: 10px; width: 100%; align-items: flex-start; }
+        .chat-msg-row.me { justify-content: flex-end; }
+        .chat-msg-row.other { justify-content: flex-start; }
+        .chat-bubble-wrapper { display: flex; flex-direction: column; max-width: 65%; }
+        .chat-msg-row.me .chat-bubble-wrapper { align-items: flex-end; }
+        .chat-sender-name { font-size: 12px; color: #888; margin-bottom: 4px; margin-left: 2px; }
+        .chat-bubble { padding: 10px 14px; border-radius: 8px; font-size: 15px; line-height: 1.5; word-wrap: break-word; position: relative; }
+        .chat-bubble.me { background-color: #ffffff; color: #0f1419; border: 1px solid #e0e0e0; border-top-right-radius: 2px; }
+        .chat-bubble.other { background-color: #1d9bf0; color: #ffffff; border-top-left-radius: 2px; }
+        .chat-bubble img { max-width: 100%; border-radius: 6px; margin-top: 5px; }
+        .chat-input-area { display: flex; flex-direction: column; background: #f7f7f7; border-top: 1px solid #e0e0e0; padding: 10px 15px; flex-shrink: 0; }
+        .chat-input-row { display: flex; gap: 10px; align-items: center; width: 100%; }
+        .chat-input-row input { flex-grow: 1; border: 2px solid #1d9bf0; border-radius: 9999px; padding: 10px 18px; outline: none; font-size: 15px; color: #1d9bf0; }
+    </style>
+</head>
+<body>
+
+<div id="customContextMenu" class="custom-context-menu">
+    <button class="context-btn" id="ctxBtnStar" onclick="contextActionStar()">特别关注⭐</button>
+    <button class="context-btn" style="color: #f91880;" id="ctxBtnUnfollow" onclick="contextActionUnfollow()">取消关注</button>
+</div>
+
+<div class="layout-container">
+    <header class="sidebar-left">
+        <div class="sidebar-content">
+            <div class="logo" onclick="clickHome()"><h2>𝕏 (AI版)</h2></div>
+            <nav class="nav-menu">
+                <a onclick="switchMainView('home')" class="nav-item active" id="nav-home">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>主页
+                </a>
+                <a onclick="switchMainView('followingList')" class="nav-item" id="nav-following">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>关注
+                </a>
+                <a onclick="switchMainView('notifications')" class="nav-item" id="nav-notif">
+                    <span class="badge" id="notifBadge">0</span>
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>通知
+                </a>
+                <a onclick="switchMainView('chat')" class="nav-item" id="nav-chat">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>聊天
+                </a>
+                <a onclick="switchMainView('profile', 'me')" class="nav-item" id="nav-myprofile">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>个人资料
+                </a>
+                <a onclick="openCharacterCenter()" class="nav-item">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>角色中心
+                </a>
+                <a onclick="openModal('worldbookModal'); renderWorldbookCards();" class="nav-item">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>世界书
+                </a>
+                <a onclick="openModal('emoticonManagerModal'); renderEmoticonManagerGallery();" class="nav-item">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>表情
+                </a>
+                <a onclick="openNewspaperModal()" class="nav-item" id="nav-newspaper">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0-2-2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6z"></path></svg>小报
+                </a>
+                <a onclick="openModal('settingsModal')" class="nav-item">
+                    <svg class="nav-icon blue-line-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h-.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>设置
+                </a>
+            </nav>
+            <div class="user-profile-mini" onclick="openUserProfileModal()">
+                <div id="mySidebarAvatar" class="avatar">我</div>
+                <div class="user-info">
+                    <div class="user-name" id="mySidebarName">您的智能管家</div>
+                    <div class="user-handle" id="mySidebarHandle">@my_account</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div id="view-home">
+            <div class="top-tabs">
+                <div class="tab active" id="tab-recommend" onclick="switchHomeTab('recommend')">为你推荐</div>
+                <div class="tab" id="tab-following" onclick="switchHomeTab('following')">正在关注</div>
+            </div>
+            <div class="user-post-area">
+                <div class="user-post-input-row">
+                    <div id="homeUserAvatar" class="avatar">我</div>
+                    <input type="text" id="userPostInput" placeholder="有什么新鲜事？发出来让角色们看看..." onkeypress="if(event.key === 'Enter') userPost()">
+                    <button class="btn-edit-small" title="添加表情/图片" onclick="openEmoticonPicker('post')">🖼️</button>
+                    <button class="btn-post" onclick="userPost()">发帖</button>
+                </div>
+                <div id="postAttachmentPreview" class="emo-preview-box" style="display:none;"></div>
+            </div>
+            <div id="loadingStatus" style="display:none; text-align:center; padding:15px; color:#1d9bf0; font-weight:bold; border-bottom:1px solid #eff3f4;">AI 正在生成新鲜事，请稍候... ⏳</div>
+            <div class="feed-section" id="feedSection"><div class="empty-state">请先在左侧"⚙️ 设置"填入密钥并拉取模型。<br><br>点击左侧"主页"刷新，或等待系统自动发帖！</div></div>
+        </div>
+
+        <div id="view-chat" style="display: none;">
+            <div class="header-title"><div class="back-btn" onclick="switchMainView('home')">←</div> 💬 聊天</div>
+            <div id="chatCharRow" class="chat-char-row"></div>
+            <div id="chatMessagesArea" class="chat-messages">
+                <div class="empty-state">请在上方选择一个角色或群聊开始聊天。</div>
+            </div>
+            <div class="chat-input-area" id="chatInputArea" style="display:none;">
+                <div id="chatAttachmentPreview" class="emo-preview-box" style="display:none; padding-left:0; margin-bottom:10px;"></div>
+                <div class="chat-input-row">
+                    <button class="btn-edit-small" title="添加表情/图片" onclick="openEmoticonPicker('chat')">🖼️</button>
+                    <input type="text" id="chatInput" placeholder="发送消息...（群聊中可用 @角色名 艾特，对方会强制回复）" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                    <button class="btn-post" onclick="sendChatMessage()">发送</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile" style="display: none;">
+            <div class="header-title"><div class="back-btn" onclick="switchMainView('home')">←</div><div class="profile-header-info"><div class="profile-header-name" id="profHeadName">加载中...</div><div class="profile-header-meta" id="profHeadPosts">0 帖子</div></div></div>
+            <div class="profile-banner" id="profBanner"></div>
+            <div class="profile-details">
+                <div id="profAvatarWrap"></div>
+                <div class="profile-actions"><button id="profFollowBtn" class="follow-btn">关注</button></div>
+                <div class="profile-name-section">
+                    <div style="font-weight:bold; font-size:22px; display:flex; align-items:center; gap:4px;" id="profName">名字</div>
+                    <div style="color:#536471; font-size:15px;" id="profHandle">@handle</div>
+                </div>
+                <div class="profile-bio" id="profBio">简介</div>
+                <div class="profile-meta-info">
+                    <div class="profile-meta-item" id="profLocation"></div>
+                    <div class="profile-meta-item" id="profWebsite"></div>
+                    <div class="profile-meta-item" id="profJoin"><svg class="blue-line-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> <span id="profBirthdate"></span> 加入</div>
+                </div>
+                <div class="profile-stats"><div><b style="color:#1d9bf0;" id="profFollowing">100</b> 正在关注</div><div><b style="color:#1d9bf0;" id="profFollowers">1万</b> 关注者</div></div>
+            </div>
+            <div class="top-tabs" style="position:static;">
+                <div class="tab active" id="prof-tab-posts" onclick="switchProfileTab('posts')">帖子</div>
+                <div class="tab" id="prof-tab-replies" onclick="switchProfileTab('replies')">回复</div>
+                <div class="tab" id="prof-tab-highlights" onclick="switchProfileTab('highlights')">亮点</div>
+                <div class="tab" id="prof-tab-media" onclick="switchProfileTab('media')">媒体</div>
+            </div>
+            <div class="feed-section" id="profileFeedSection"></div>
+        </div>
+
+        <div id="view-post-detail" style="display: none;">
+            <div class="header-title"><div class="back-btn" onclick="switchMainView('home')">←</div> 帖子详情</div>
+            <div class="feed-section" id="postDetailSection"></div>
+        </div>
+
+        <div id="view-following-list" style="display: none;">
+            <div class="header-title">我的关注</div>
+            <p style="padding: 10px 20px; color: #1d9bf0; font-size: 14px; background:white; margin:0; border-bottom:1px solid #eff3f4;">💡 提示：在角色卡片上<b>点击鼠标右键</b>，可呼出操作菜单。</p>
+            <div class="following-row-container" id="followingListContainer"></div>
+        </div>
+
+        <div id="view-search" style="display: none;">
+            <div class="header-title"><div class="back-btn" onclick="switchMainView('home')">←</div> 搜索: <span id="currentSearchTitle" style="color:#1d9bf0; margin-left:5px;"></span></div>
+            <div class="feed-section" id="searchFeedSection"></div>
+        </div>
+        <div id="view-tag" style="display: none;">
+            <div class="header-title"><div class="back-btn" onclick="switchMainView('home')">←</div> 标签: <span id="currentTagTitle" style="color:#1d9bf0; margin-left:5px;"></span></div>
+            <div class="feed-section" id="tagFeedSection"></div>
+        </div>
+        <div id="view-notifications" style="display: none;">
+            <div class="header-title">通知中心</div>
+            <div id="notificationsSection"></div>
+        </div>
+    </main>
+
+    <aside class="sidebar-right">
+        <div class="sidebar-right-content">
+            <div class="search-box">
+                <svg class="blue-line-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="globalSearchInput" placeholder="搜索帖子或角色" onkeypress="if(event.key === 'Enter') switchMainView('search', this.value)">
+            </div>
+            <div class="info-card" id="rightPanelTrend">
+                <h3>有什么新鲜事</h3>
+                <p style="font-size:12px; color:#1d9bf0; margin-top:-10px; margin-bottom:10px;">(单击查看，双击修改)</p>
+                <div id="trendListContainer"></div>
+                <div class="add-trend-box"><input type="text" id="customTrendInput" placeholder="自定义标签"><button onclick="addCustomTrend()">添加</button></div>
+            </div>
+            <div class="info-card" id="rightPanelProfile" style="display: none; padding: 0; overflow: hidden;"></div>
+        </div>
+    </aside>
+</div>
+
+<div class="modal-overlay" id="createGroupChatModal">
+    <div class="modal-box" style="width: 480px;">
+        <h2>💬 发起多角色群聊</h2>
+        <div class="form-hint">选择多个角色，建立一个专属的群组。</div>
+        <div class="input-group full-width">
+            <label>群聊名称</label>
+            <input type="text" id="newGroupChatName" placeholder="例如：摸鱼群、主角团...">
+        </div>
+        <div class="input-group full-width">
+            <label>群头像 (支持 PNG/JPG)</label>
+            <input type="file" id="newGroupAvatarFile" accept="image/png, image/jpeg">
+        </div>
+        <div class="input-group full-width">
+            <label>选择群成员</label>
+            <div id="groupChatCharPicker" class="char-checkbox-grid" style="border:1px solid #1d9bf0; padding:10px; border-radius:8px;"></div>
+        </div>
+        <button class="btn-primary" onclick="saveGroupChat()">立即创建</button>
+        <button class="btn-cancel" onclick="closeModal('createGroupChatModal')">取消</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="emoticonManagerModal">
+    <div class="modal-box" style="width: 500px;">
+        <h2>🖼️ 管理表情包/图片库</h2>
+        <div class="form-hint">支持本地文件上传或通过网络URL添加。</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="file" id="emoFileInput" multiple accept="image/png, image/jpeg, image/gif" style="display: none;" onchange="handleEmoticonUpload(event)">
+            <button class="btn-secondary" style="margin-top:0; flex:1;" onclick="document.getElementById('emoFileInput').click()">📁 本地批量上传</button>
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <input type="text" id="emoUrlInput" placeholder="输入图片网络 URL" style="flex:1; padding:8px; border:1px solid #1d9bf0; border-radius:4px; font-size:14px; color:#1d9bf0;">
+            <button class="btn-post" onclick="addEmoticonByUrl()">添加链接</button>
+        </div>
+        <div id="emoticonManagerGallery" class="emo-grid"></div>
+        <button class="btn-cancel" onclick="closeModal('emoticonManagerModal')">关闭窗口</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="emoticonPickerModal">
+    <div class="modal-box" style="width: 450px; padding: 20px;">
+        <h3 style="margin-top:0; margin-bottom:10px; color:#1d9bf0;">选择一个表情/图片</h3>
+        <div id="emoticonPickerGallery" class="emo-grid" style="max-height: 250px;"></div>
+        <button class="btn-cancel" onclick="closeModal('emoticonPickerModal')">取消选择</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="worldbookModal">
+    <div class="modal-box" style="width: 600px;">
+        <h2>📚 世界书设定</h2>
+        <div class="form-hint">开启特定的世界书后，AI 角色将在生成帖子、回复和聊天时，强制融入这些背景设定。</div>
+        <div id="worldbookContainer" style="display: flex; gap: 12px; overflow-x: auto; padding: 5px 5px 15px 5px; margin-bottom: 10px;"></div>
+        <div style="border-top: 1px solid #1d9bf0; padding-top: 15px;">
+            <h4 style="margin-top:0; margin-bottom:10px; color:#1d9bf0;">新增世界书设定</h4>
+            <input type="text" id="newWbTitle" placeholder="输入设定标题 (例: 赛博朋克2077)" style="width:100%; margin-bottom:8px; padding:8px; border:1px solid #1d9bf0; border-radius:4px; font-size:14px; color:#1d9bf0;">
+            <textarea id="newWbContent" rows="3" placeholder="详细输入世界的背景信息..." style="width:100%; padding:8px; margin-bottom:8px; border:1px solid #1d9bf0; border-radius:4px; font-size:14px; font-family:inherit; outline:none;"></textarea>
+            <button class="btn-primary" onclick="addWorldbook()" style="margin-top:0;">添加世界书</button>
+        </div>
+        <button class="btn-cancel" onclick="closeModal('worldbookModal')">关闭窗口</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="userProfileModal">
+    <div class="modal-box">
+        <h2>自定义我的资料</h2>
+        <div class="form-grid">
+            <div class="input-group"><label>自定义头像</label><input type="file" id="myAvatarFile" accept="image/*"></div>
+            <div class="input-group"><label>自定义背景图</label><input type="file" id="myBgFile" accept="image/*"></div>
+            <div class="input-group"><label>用户名</label><input type="text" id="myName"></div>
+            <div class="input-group"><label>账号 ID</label><input type="text" id="myHandle"></div>
+            <div class="input-group full-width"><label>个人简介 (Bio)</label><textarea id="myBio" rows="2"></textarea></div>
+            <div class="input-group"><label>关注者数量</label><input type="number" id="myFollowers"></div>
+            <div class="input-group"><label>正在关注数量</label><input type="number" id="myFollowing"></div>
+            <div class="input-group"><label>位置 (Location)</label><input type="text" id="myLocation"></div>
+            <div class="input-group"><label>个人网站</label><input type="text" id="myWebsite"></div>
+            <div class="input-group"><label>出生日期</label><input type="date" id="myBirthdate"></div>
+            <div class="input-group checkbox-group"><input type="checkbox" id="myVerified"><label style="margin:0; font-size:14px; color:#1d9bf0;">官方认证 (蓝V)</label></div>
+        </div>
+        <button class="btn-primary" onclick="saveUserProfile()">保存我的资料</button>
+        <button class="btn-cancel" onclick="closeModal('userProfileModal')">取消</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+        <h2>系统设置</h2>
+        <div class="form-hint">支持任何兼容 OpenAI 格式的 API。输入接口地址和密钥后，点击“拉取模型”即可自动获取可用模型。</div>
+        
+        <div class="input-group">
+            <label>API 接口地址 (Base URL)</label>
+            <input type="text" id="apiUrlInput" placeholder="例如: https://api.deepseek.com" value="https://api.deepseek.com">
+        </div>
+        
+        <div class="input-group">
+            <label>API Key (密钥)</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-...">
+        </div>
+        
+        <button class="btn-secondary" style="margin-top: 5px; padding: 10px;" onclick="fetchModels()">🔄 测试连接并拉取模型</button>
+        
+        <div class="input-group" style="margin-top: 15px;">
+            <label>选择 AI 模型</label>
+            <select id="modelSelect">
+                <option value="deepseek-chat">deepseek-chat (默认)</option>
+            </select>
+        </div>
+        
+        <button class="btn-primary" onclick="saveSettings()">保存基本设置</button>
+        
+        <div class="input-group" style="margin-top:25px; border-top:1px solid #1d9bf0; padding-top:20px;">
+            <label style="font-size:16px;">💾 数据备份与恢复</label>
+            <div style="font-size:12px; color:#1d9bf0; margin-bottom:10px;">打包下载您的所有心血记录，永不丢失。</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-secondary" style="margin-top:0;" onclick="exportData()">📥 导出备份 (JSON)</button>
+                <button class="btn-secondary" style="margin-top:0; color:#536471; border-color:#536471;" onclick="triggerImport()">📤 导入恢复</button>
+                <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importData(event)">
+            </div>
+        </div>
+        <button class="btn-cancel" onclick="closeModal('settingsModal')">关闭窗口</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="characterCenterModal">
+    <div class="modal-box" style="width:580px;">
+        <div id="characterListView">
+            <h2>角色中心</h2>
+            <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;" id="groupFilterBar"><span class="group-tag" style="background:white; color:#1d9bf0; border:1px solid #1d9bf0;" onclick="filterByGroup(null)">全部</span></div>
+            <div id="centerCharListContainer"></div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+                <button class="btn-secondary" style="margin-top:0;" onclick="openFormForCreate()">+ 创建新角色</button>
+                <button class="btn-secondary" style="margin-top:0;" onclick="openGroupManagerModal()">🏷️ 管理分组</button>
+            </div>
+            <button class="btn-cancel" onclick="closeModal('characterCenterModal')">关闭</button>
+        </div>
+        <div id="characterFormView" style="display: none;">
+            <h2 id="formTitle">创建新 AI 角色</h2>
+            <div class="input-group full-width"><label>🔥 角色人设 (必填)</label><textarea id="charPersona" rows="3"></textarea></div>
+            <div class="input-group full-width" style="background:white; border:1px solid #1d9bf0; padding:10px; border-radius:8px;">
+                <label style="color:#1d9bf0;">⏱️ 自动发帖频率设定</label>
+                <div class="freq-group">每 <input type="number" id="freqInterval" value="1" min="1"> <select id="freqUnit" style="width:70px;"><option value="minute">分钟</option><option value="hour">小时</option><option value="day" selected>天</option></select> 发布 <input type="number" id="freqCount" value="1" min="1"> 条帖子</div>
+            </div>
+            <div class="input-group full-width" style="background:white; border:1px solid #1d9bf0; padding:10px; border-radius:8px;">
+                <label style="color:#1d9bf0;">💬 主动发消息间隔（私聊）</label>
+                <div class="freq-group">每 <input type="number" id="chatFreqInterval" value="0" min="0"> <select id="chatFreqUnit" style="width:70px;"><option value="minute">分钟</option><option value="hour" selected>小时</option><option value="day">天</option></select> 主动发起一次对话（设为 0 表示不主动发起）</div>
+            </div>
+            <div class="input-group full-width" style="background:white; border:1px solid #1d9bf0; padding:10px; border-radius:8px;">
+                <label style="color:#1d9bf0;">🤐 不愿回复时的自动回复（群聊@/不想理人时使用）</label>
+                <textarea id="charAutoReply" rows="2" placeholder="例如：嗯。 / 知道了，没空理你。 / [留空则由AI根据人设自动生成]"></textarea>
+            </div>
+            <div class="input-group full-width"><label>🏷️ 角色分组</label><select id="charGroup"><option value="">-- 无分组 --</option></select></div>
+            <div class="form-grid">
+                <div class="input-group"><label>自定义头像</label><input type="file" id="charAvatar" accept="image/*"></div>
+                <div class="input-group"><label>背景图</label><input type="file" id="charBg" accept="image/*"></div>
+                <div class="input-group"><label>用户名</label><input type="text" id="charName"></div>
+                <div class="input-group"><label>账号 ID</label><input type="text" id="charHandle"></div>
+                <div class="input-group full-width"><label>简介</label><textarea id="charBio" rows="2"></textarea></div>
+                <div class="input-group"><label>粉丝数</label><input type="number" id="charFollowers"></div>
+                <div class="input-group"><label>关注数</label><input type="number" id="charFollowing"></div>
+                <div class="input-group"><label>位置</label><input type="text" id="charLocation"></div>
+                <div class="input-group"><label>网站</label><input type="text" id="charWebsite"></div>
+                <div class="input-group"><label>出生日期</label><input type="date" id="charBirthdate"></div>
+                <div class="input-group checkbox-group"><input type="checkbox" id="charVerified"><label style="margin:0; font-size:14px; color:#1d9bf0;">官方认证</label></div>
+            </div>
+            <button class="btn-primary" id="saveCharBtn" onclick="saveCharacter()">保存并生成角色</button>
+            <button class="btn-cancel" id="cancelCharBtn" onclick="showRoleList()">返回列表</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="groupManagerModal">
+    <div class="modal-box" style="width:400px;">
+        <h2>🏷️ 管理角色分组</h2>
+        <div id="groupListContainer" style="margin-bottom:12px;"></div>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="newGroupInput" placeholder="输入新分组名称" style="flex:1; padding:8px; border:1px solid #1d9bf0; border-radius:8px; font-size:14px; color:#1d9bf0;">
+            <button class="btn-post" onclick="addGroup()">添加</button>
+        </div>
+        <button class="btn-cancel" onclick="closeModal('groupManagerModal'); openCharacterCenter()">返回角色中心</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="memoryModal">
+    <div class="modal-box" style="width:500px;">
+        <h2 id="memoryModalTitle">📖 角色记忆总结</h2>
+        <div id="memoryContentWrapper" style="margin-bottom:10px;"></div>
+        <div style="font-weight:bold; font-size:13px; margin-bottom:5px; color:#1d9bf0;">选择用于总结的帖子 (最近最多20条)：</div>
+        <div id="memoryPostList" class="memory-post-list"></div>
+        <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn-primary" style="margin-top:0; flex:1;" onclick="saveCharMemory()">💾 保存记忆修改</button>
+            <button class="btn-secondary" style="margin-top:0; flex:1;" id="refreshMemoryBtn" onclick="refreshCharMemory()">🔄 重新总结</button>
+        </div>
+        <button class="btn-cancel" onclick="closeModal('memoryModal')">关闭</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="chatSummaryModal">
+    <div class="modal-box" style="width:480px;">
+        <h2 id="chatSummaryTitle">💬 聊天总结</h2>
+        <div class="form-hint">AI 会每隔10条对话自动更新总结，您也可以在下方手动编辑后保存。</div>
+        <textarea id="chatSummaryEditArea" rows="6" style="width:100%; padding:10px; border:1px solid #1d9bf0; border-radius:8px; font-family:inherit; font-size:14px; outline:none; box-sizing:border-box;"></textarea>
+        <button class="btn-primary" onclick="saveChatSummaryManual()">💾 保存总结</button>
+        <button class="btn-cancel" onclick="closeModal('chatSummaryModal')">关闭</button>
+    </div>
+</div>
+
+<script>
+    // ===== 全局变量及SVG常量 =====
+    const verifiedSVG = `<svg class="verified-badge blue-line-icon" viewBox="0 0 24 24"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"></polygon><polyline points="9 12 11 14 15 10"></polyline></svg>`;
+    const commentSVG = `<svg class="stat-icon blue-line-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
+    const retweetSVG = `<svg class="stat-icon blue-line-icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>`;
+    const likeSVG = `<svg class="stat-icon blue-line-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+    const likeSVGFilled = `<svg class="stat-icon blue-line-icon" style="fill:#1d9bf0 !important;" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+    const viewSVG = `<svg class="stat-icon blue-line-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+    const locationSVG = `<svg class="blue-line-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+    const websiteSVG = `<svg class="blue-line-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+
+    // --- API 与系统设定变量 ---
+    let myApiUrl = "https://api.deepseek.com"; 
+    let myApiKey = ""; 
+    let myModel = "deepseek-chat"; 
+    
+    let homeTab = "recommend";
+    let pendingReplyAttachment = null; 
+    let pendingPostAttachment = null;
+    let pendingInlineAttachments = {};
+    let editingCharId = null; let unreadNotifs = 0; let isGenerating = false;
+    let contextMenuTargetId = null;
+    let currentProfileId = null; let currentProfileTab = "posts";
+    let activeGroupFilter = null;
+    let memoryViewingCharId = null;
+    let currentSummaryCharId = null;
+
+    let currentUser = {
+        id: 'me', name: "您的智能管家", handle: "@my_account", bio: "这是我的个人签名...",
+        followers: 128, following: 50, location: "地球", website: "myblog.com",
+        birthdate: "2000-01-01", verified: false, avatarImg: null, bgImg: null,
+        avatarEmoji: "我", themeColor: "#1d9bf0"
+    };
+    let globalPosts = []; let globalNotifications = [];
+    let trendingTags = ["#赛博朋克2026", "#科技改变生活", "#打工人的日常"];
+
+    // ===== 角色分组、世界书、表情及聊天数据 =====
+    let characterGroups = ["Vtuber", "程序员", "偶像", "校园", "都市"];
+    let worldbooks = [{ id: 1, title: "赛博纪元 2026", content: "这是一个高度发达但充满阶级矛盾的赛博朋克城市...", active: false }];
+    let globalEmoticons = []; 
+    let groupChats = []; 
+    let globalChats = {}; 
+    let currentChatSessionId = null;
+
+    let myCharacters = [
+        { id: 1, name: "苑楽アソビ", handle: "@EngakuAsobi", persona: "个人势Vtuber，喜欢分享生活日常和剪辑，性格活泼开朗。", bio: "我是个人势Vtuber苑乐アソビ。", followers: "6万", following: "441", location: "日本", website: "lit.link/EngakuAsobi", birthdate: "2020-04-01", isFollowing: true, isSpecialFollow: true, verified: true, avatarEmoji: "🎮", themeColor: "#1d9bf0", postFreq: {interval: 1, unit: 'day', count: 1}, lastPostTime: Date.now(), chatFreq: {interval: 6, unit: 'hour'}, lastChatProactiveTime: Date.now(), autoReplyText: '诶嘿嘿，待会再聊~', group: "Vtuber", memorySummary: "", chatSummary: "" },
+        { id: 2, name: "硬核程序员", handle: "@coder_life", persona: "每天写代码，吐槽bug，性格高冷内向。", bio: "代码改变世界。", followers: "2000", following: "100", location: "硅谷", website: "", birthdate: "1995-01-01", isFollowing: false, isSpecialFollow: false, verified: false, avatarEmoji: "💻", themeColor: "#1d9bf0", postFreq: {interval: 1, unit: 'day', count: 1}, lastPostTime: Date.now(), chatFreq: {interval: 0, unit: 'hour'}, lastChatProactiveTime: Date.now(), autoReplyText: '嗯。', group: "程序员", memorySummary: "", chatSummary: "" }
+    ];
+
+    window.onload = function() { 
+        loadAllData();       
+        renderPosts();       
+        renderTrends(); 
+        renderCenterCharList(); 
+        updateUserMiniProfile();
+        startAutoPostTimer(); 
+        startProactiveChatTimer();
+        setInterval(updateAllRelativeTimes, 60000); 
+    };
+
+    // --- 工具函数 ---
+    function formatStat(num) { if(typeof num === 'string') return num; if(num>=10000) return(num/10000).toFixed(1)+'万'; if(num>=1000) return(num/1000).toFixed(1)+'k'; return num; }
+    function parseStat(val) { if(typeof val === 'number') return val; let str=String(val).toLowerCase(); if(str.includes('k')) return parseFloat(str)*1000; if(str.includes('万')) return parseFloat(str)*10000; return parseInt(str)||0; }
+    function getRandomStat(max) { return Math.floor(Math.random() * max); }
+    function timeAgo(timestamp) { const s = Math.floor((Date.now()-timestamp)/1000); if(s<60) return"刚刚"; const m=Math.floor(s/60); if(m<60) return m+"分钟前"; const h=Math.floor(m/60); if(h<24) return h+"小时前"; const d=Math.floor(h/24); return d+"天前"; }
+    function updateAllRelativeTimes() { document.querySelectorAll('.time-updater').forEach(el => { const ts = parseInt(el.getAttribute('data-timestamp')); if(ts) el.innerText = timeAgo(ts); }); }
+    function fileToBase64(file) { return new Promise((r, j) => { const reader = new FileReader(); reader.onload = () => r(reader.result); reader.onerror = e => j(e); reader.readAsDataURL(file); }); }
+    function getAvatarHTML(char, size = 40, extraClass = '') { 
+        if(!char) char = { name:'未知', themeColor:'#1d9bf0', avatarEmoji:'?' };
+        const style = `width:${size}px; height:${size}px;`; 
+        if (char.avatarImg) return `<div class="avatar ${extraClass}" style="${style} background-image:url('${char.avatarImg}'); background-size:cover; background-position:center; border:2px solid transparent;"></div>`; 
+        return `<div class="avatar ${extraClass}" style="${style} background-color:white; border:2px solid #1d9bf0; color:#1d9bf0; font-size:${size*0.4}px;">${char.avatarEmoji || char.name?.[0] || '?'}</div>`; 
+    }
+    function getGroupAvatarHTML(g, size=50, extraClass = '') {
+        const style = `width:${size}px; height:${size}px;`;
+        if(g.avatarImg) return `<div class="avatar ${extraClass}" style="${style} background-image:url('${g.avatarImg}'); background-size:cover; background-position:center; border:2px solid transparent;"></div>`;
+        return `<div class="avatar ${extraClass}" style="${style} background:white; color:#1d9bf0; font-size:${size*0.4}px; border:2px solid #1d9bf0; display:flex; align-items:center; justify-content:center;">群</div>`;
+    }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // --- 数据存储读取机制 ---
+    function saveAllData() {
+        const dataToSave = {
+            myCharacters: myCharacters,
+            globalPosts: globalPosts,
+            characterGroups: characterGroups,
+            globalEmoticons: globalEmoticons,
+            worldbooks: worldbooks,
+            globalChats: globalChats,
+            groupChats: groupChats,
+            currentUser: currentUser,
+            trendingTags: trendingTags,
+            apiUrl: myApiUrl,
+            apiKey: myApiKey,
+            myModel: myModel
+        };
+        localStorage.setItem('myTwitterAppData', JSON.stringify(dataToSave));
+        console.log("数据已自动保存！");
+    }
+
+    function loadAllData() {
+        const savedData = localStorage.getItem('myTwitterAppData');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                if(parsed.myCharacters) myCharacters = parsed.myCharacters;
+                if(parsed.globalPosts) globalPosts = parsed.globalPosts;
+                if(parsed.characterGroups) characterGroups = parsed.characterGroups;
+                if(parsed.globalEmoticons) globalEmoticons = parsed.globalEmoticons;
+                if(parsed.worldbooks) worldbooks = parsed.worldbooks;
+                if(parsed.globalChats) globalChats = parsed.globalChats;
+                if(parsed.groupChats) groupChats = parsed.groupChats; 
+                if(parsed.currentUser) currentUser = parsed.currentUser;
+                if(parsed.trendingTags) trendingTags = parsed.trendingTags;
+                if (parsed.apiUrl) myApiUrl = parsed.apiUrl;
+                if (parsed.apiKey) myApiKey = parsed.apiKey;
+                if (parsed.myModel) myModel = parsed.myModel;
+
+                const urlInput = document.getElementById('apiUrlInput');
+                const keyInput = document.getElementById('apiKeyInput');
+                const modelSelect = document.getElementById('modelSelect');
+                
+                if (urlInput) urlInput.value = myApiUrl;
+                if (keyInput) keyInput.value = myApiKey;
+                if (modelSelect && myModel) {
+                    if (!Array.from(modelSelect.options).some(opt => opt.value === myModel)) {
+                        modelSelect.innerHTML += `<option value="${myModel}">${myModel}</option>`;
+                    }
+                    modelSelect.value = myModel;
+                }
+            } catch (e) {
+                console.error("数据读取出错:", e);
+            }
+        }
+    }
+
+    // --- 数据备份 ---
+    function exportData() {
+        const data = { myApiUrl, myApiKey, myModel, currentUser, myCharacters, trendingTags, globalPosts, globalNotifications, characterGroups, worldbooks, globalEmoticons, globalChats, groupChats };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = "twitter_ai_backup.json";
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function triggerImport() { document.getElementById('importFileInput').click(); }
+    function importData(event) {
+        const file = event.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(data.myApiUrl !== undefined) myApiUrl = data.myApiUrl;
+                if(data.myApiKey !== undefined) myApiKey = data.myApiKey;
+                if(data.myModel !== undefined) myModel = data.myModel;
+                if(data.currentUser) currentUser = data.currentUser;
+                if(data.myCharacters) myCharacters = data.myCharacters;
+                if(data.trendingTags) trendingTags = data.trendingTags;
+                if(data.globalPosts) globalPosts = data.globalPosts;
+                if(data.globalNotifications) globalNotifications = data.globalNotifications;
+                if(data.characterGroups) characterGroups = data.characterGroups;
+                if(data.worldbooks) worldbooks = data.worldbooks;
+                if(data.globalEmoticons) globalEmoticons = data.globalEmoticons;
+                if(data.globalChats) globalChats = data.globalChats;
+                if(data.groupChats) groupChats = data.groupChats;
+                updateUserMiniProfile(); renderTrends(); switchMainView('home'); closeModal('settingsModal'); alert("数据恢复成功！欢迎回来。");
+                saveAllData();
+            } catch(err) { alert("文件格式错误，恢复失败！"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- 拉取 API 模型的函数 ---
+    async function fetchModels() {
+        let urlInput = document.getElementById('apiUrlInput').value.trim();
+        const keyInput = document.getElementById('apiKeyInput').value.trim();
+        if (!urlInput || !keyInput) return alert("请先填写接口地址和密钥！");
+
+        if(urlInput.endsWith('/')) urlInput = urlInput.slice(0, -1);
+        
+        const btn = event.target;
+        const oldText = btn.innerText;
+        btn.innerText = "正在拉取模型中... ⏳";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${urlInput}/models`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${keyInput}` }
+            });
+            
+            if (!res.ok) throw new Error(`HTTP 错误代码: ${res.status}`);
+            const data = await res.json();
+            
+            if (data && data.data && Array.isArray(data.data)) {
+                const select = document.getElementById('modelSelect');
+                select.innerHTML = data.data.map(m => `<option value="${m.id}">${m.id}</option>`).join('');
+                alert(`成功拉取 ${data.data.length} 个模型！请在下拉菜单中选择后，点击“保存基本设置”。`);
+            } else {
+                throw new Error("接口返回的数据格式不符合标准。");
+            }
+        } catch (e) {
+            alert("拉取失败：" + e.message + "\n\n请检查：\n1. 接口地址和密钥是否正确。\n2. 代理地址是否以 /v1 结尾（如果是 OpenAI 代理）。");
+        } finally {
+            btn.innerText = oldText;
+            btn.disabled = false;
+        }
+    }
+
+    function saveSettings() {
+        myApiUrl = document.getElementById('apiUrlInput').value.trim();
+        if(myApiUrl.endsWith('/')) myApiUrl = myApiUrl.slice(0, -1);
+        myApiKey = document.getElementById('apiKeyInput').value.trim();
+        myModel = document.getElementById('modelSelect').value;
+        
+        if(!myApiUrl || !myApiKey) return alert("请完整填写接口地址和密钥！");
+        
+        saveAllData(); 
+        alert("设置保存成功！");
+        closeModal('settingsModal');
+    }
+
+    // --- 用户资料 ---
+    function openUserProfileModal() {
+        document.getElementById('myName').value = currentUser.name; document.getElementById('myHandle').value = currentUser.handle;
+        document.getElementById('myBio').value = currentUser.bio; document.getElementById('myFollowers').value = currentUser.followers;
+        document.getElementById('myFollowing').value = currentUser.following; document.getElementById('myLocation').value = currentUser.location || '';
+        document.getElementById('myWebsite').value = currentUser.website || ''; document.getElementById('myBirthdate').value = currentUser.birthdate || '';
+        document.getElementById('myVerified').checked = currentUser.verified || false; openModal('userProfileModal');
+    }
+    async function saveUserProfile() {
+        currentUser.name = document.getElementById('myName').value || currentUser.name;
+        let h = document.getElementById('myHandle').value || currentUser.handle; currentUser.handle = h.startsWith('@') ? h : '@' + h;
+        currentUser.bio = document.getElementById('myBio').value; currentUser.followers = document.getElementById('myFollowers').value || 0;
+        currentUser.following = document.getElementById('myFollowing').value || 0; currentUser.location = document.getElementById('myLocation').value;
+        currentUser.website = document.getElementById('myWebsite').value; currentUser.birthdate = document.getElementById('myBirthdate').value;
+        currentUser.verified = document.getElementById('myVerified').checked;
+        if (document.getElementById('myAvatarFile').files[0]) currentUser.avatarImg = await fileToBase64(document.getElementById('myAvatarFile').files[0]);
+        if (document.getElementById('myBgFile').files[0]) currentUser.bgImg = await fileToBase64(document.getElementById('myBgFile').files[0]);
+        globalPosts.forEach(p => { if (p.char.id === 'me') p.char = { ...currentUser }; p.replies.forEach(r => { if (r.char.id === 'me') r.char = { ...currentUser }; }); });
+        updateUserMiniProfile(); closeModal('userProfileModal'); alert("个人资料更新成功！");
+        saveAllData();
+        if (currentProfileId === 'me' && document.getElementById('view-profile').style.display !== 'none') renderProfilePage('me');
+        if (document.getElementById('view-home').style.display !== 'none') renderPosts();
+    }
+    function updateUserMiniProfile() {
+        document.getElementById('mySidebarName').innerText = currentUser.name; document.getElementById('mySidebarHandle').innerText = currentUser.handle;
+        [document.getElementById('mySidebarAvatar'), document.getElementById('homeUserAvatar')].forEach(div => {
+            if (currentUser.avatarImg) { div.style.backgroundImage = `url('${currentUser.avatarImg}')`; div.style.backgroundSize = 'cover'; div.style.backgroundPosition = 'center'; div.innerHTML = ""; }
+            else { div.style.backgroundImage = 'none'; div.style.backgroundColor = 'white'; div.innerHTML = currentUser.avatarEmoji || currentUser.name?.[0] || '我'; }
+        });
+    }
+
+    // ======================================================
+    // ===== 聊天系统及总结机制 =====
+    // ======================================================
+    let pendingChatAttachment = null;
+    
+    function renderChatCharList() {
+        const container = document.getElementById('chatCharRow');
+        let html = `
+            <div class="chat-char-item" onclick="openCreateGroupModal()">
+                <div class="avatar" style="background:white; color:#1d9bf0; border:2px dashed #1d9bf0; font-size:24px; display:flex; justify-content:center; align-items:center; width:50px; height:50px;">+</div>
+                <div style="font-size:12px; margin-top:5px; white-space:nowrap; overflow:hidden;">建群</div>
+            </div>`;
+        groupChats.forEach(g => {
+            html += `<div class="chat-char-item ${currentChatSessionId === g.id ? 'active' : ''}" onclick="switchChatSession('${g.id}')">
+                ${getGroupAvatarHTML(g, 50)}
+                <div style="font-size:12px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${g.name}</div>
+            </div>`;
+        });
+        myCharacters.forEach(c => {
+            html += `<div class="chat-char-item ${currentChatSessionId == c.id ? 'active' : ''}" onclick="switchChatSession('${c.id}')">
+                <div onclick="openChatSummary('${c.id}', event)">${getAvatarHTML(c, 50)}</div>
+                <div style="font-size:12px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${c.name}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function getRecentChatContext(charId) {
+        let session = globalChats[charId] || [];
+        return session.slice(-10)
+            .map(m => {
+                let date = new Date(m.timestamp).toLocaleString();
+                return `[${date}] ${m.sender === 'me' ? "用户" : "你"}: ${m.text}`;
+            })
+            .join('\n');
+    }
+
+    function openChatSummary(charId, event) {
+        if (event) event.stopPropagation();
+        const char = myCharacters.find(c => c.id == charId);
+        if (!char) return;
+        currentSummaryCharId = charId;
+        document.getElementById('chatSummaryTitle').innerText = `💬 与 ${char.name} 的聊天总结`;
+        document.getElementById('chatSummaryEditArea').value = char.chatSummary || '';
+        openModal('chatSummaryModal');
+    }
+
+    function saveChatSummaryManual() {
+        const char = myCharacters.find(c => c.id == currentSummaryCharId);
+        if (!char) return;
+        char.chatSummary = document.getElementById('chatSummaryEditArea').value.trim();
+        saveAllData();
+        alert('聊天总结已保存！');
+        closeModal('chatSummaryModal');
+    }
+
+    async function checkAndAutoSummarizeChat(sessionId) {
+        if (sessionId.toString().startsWith('g_')) return;
+        let session = globalChats[sessionId];
+        if (!session || session.length === 0 || session.length % 10 !== 0) return;
+        
+        let char = myCharacters.find(c => c.id == sessionId);
+        if (!char || !myApiKey) return;
+
+        let recent10 = session.slice(-10).map(m => (m.sender === 'me' ? "用户: " : char.name + ": ") + m.text).join('\n');
+        let prompt = `请简要总结以下用户与"${char.name}"的最近10条对话内容，提取出关键信息、当前话题和双方的情感状态（100字以内）。\n\n对话记录：\n${recent10}`;
+
+        try {
+            let res = await fetch(`${myApiUrl}/chat/completions`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, 
+                body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] }) 
+            });
+            let data = await res.json();
+            if(data.error) return;
+            let newSummary = data.choices?.[0]?.message?.content?.trim() || "";
+            if(!newSummary) return;
+            
+            if (char.chatSummary) {
+                let combinePrompt = `旧的聊天总结：${char.chatSummary}\n最新10条对话的总结：${newSummary}\n请将它们整合成一个最新的100字以内的聊天总结，保持客观简练。`;
+                let res2 = await fetch(`${myApiUrl}/chat/completions`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, 
+                    body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: combinePrompt }] }) 
+                });
+                let data2 = await res2.json();
+                if(!data2.error) {
+                    let comb = data2.choices?.[0]?.message?.content?.trim();
+                    if(comb) char.chatSummary = comb;
+                }
+            } else {
+                char.chatSummary = newSummary;
+            }
+            saveAllData();
+        } catch(e) {}
+    }
+
+    function switchChatSession(id) {
+        currentChatSessionId = id.toString();
+        renderChatCharList();
+        document.getElementById('chatInputArea').style.display = 'flex';
+        renderChatMessages();
+    }
+
+    function renderChatMessages() {
+        const container = document.getElementById('chatMessagesArea');
+        if (!currentChatSessionId) return;
+
+        let history = globalChats[currentChatSessionId] || [];
+        let isGroup = currentChatSessionId.startsWith('g_');
+        let groupData = isGroup ? groupChats.find(g => g.id === currentChatSessionId) : null;
+        let totalMembers = isGroup ? (groupData?.members.length || 1) : 1;
+
+        container.innerHTML = history.map(msg => {
+            let isMe = msg.sender === 'me';
+            let senderChar = isMe ? currentUser : myCharacters.find(c => c.id == msg.sender);
+            let timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (!isMe) {
+                if (!msg.readBy) msg.readBy = [];
+                if (!msg.readBy.includes('me')) {
+                    msg.readBy.push('me');
+                    saveAllData(); 
+                }
+            }
+
+            let readStatusHtml = '';
+            if (isMe) {
+                let readCount = Array.isArray(msg.readBy) ? msg.readBy.length : 0;
+                if (isGroup) {
+                    let unreadCount = totalMembers - readCount;
+                    if (unreadCount > 0) {
+                        readStatusHtml = `<div style="font-size:10px; color:#888; margin-top:2px;">${unreadCount}人未读</div>`;
+                    } else {
+                        readStatusHtml = `<div style="font-size:10px; color:#1d9bf0; margin-top:2px;">全部已读</div>`;
+                    }
+                } else {
+                    if (readCount > 0) {
+                        readStatusHtml = `<div style="font-size:10px; color:#1d9bf0; margin-top:2px;">已读</div>`;
+                    } else {
+                        readStatusHtml = `<div style="font-size:10px; color:#888; margin-top:2px;">未读</div>`;
+                    }
+                }
+            }
+
+            let avatarHtml = !isMe && senderChar ? 
+                `<div style="cursor:pointer;" onclick="openChatSummary('${senderChar.id}', event)" title="点击查看聊天总结">${getAvatarHTML(senderChar, 40)}</div>` : 
+                getAvatarHTML(currentUser, 40);
+
+            return `
+                <div class="chat-msg-row ${isMe ? 'me' : 'other'}">
+                    ${!isMe ? avatarHtml : ''}
+                    <div class="chat-bubble-wrapper" style="align-items: ${isMe ? 'flex-end' : 'flex-start'};">
+                        <div class="chat-sender-name" style="font-size:10px;">${!isMe && isGroup ? senderChar?.name : ''} ${timeStr}</div>
+                        <div class="chat-bubble ${isMe ? 'me' : 'other'}">
+                            ${msg.text}
+                            ${msg.mediaUrl ? `<img src="${msg.mediaUrl}">` : ''}
+                        </div>
+                        ${isMe ? readStatusHtml : ''}
+                    </div>
+                    ${isMe ? avatarHtml : ''}
+                </div>
+            `;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendChatMessage() {
+        if (!currentChatSessionId) return;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text && !pendingChatAttachment) return;
+        
+        if (!globalChats[currentChatSessionId]) globalChats[currentChatSessionId] = [];
+        globalChats[currentChatSessionId].push({ sender: 'me', text: text, timestamp: Date.now(), mediaUrl: pendingChatAttachment, readBy: [] });
+        input.value = ''; clearAttachment('chat'); renderChatMessages();
+        saveAllData();
+        checkAndAutoSummarizeChat(currentChatSessionId);
+
+        if (!myApiKey) return alert("请先配置 API Key！");
+        
+        let wbContext = getActiveWorldbookText();
+        let emoPrompt = getEmoticonPrompt();
+        let isGroup = currentChatSessionId.startsWith('g_');
+        let targetChars = [];
+        
+        if (isGroup) {
+            let g = groupChats.find(x => x.id === currentChatSessionId);
+            if (g) targetChars = g.members.map(id => myCharacters.find(c => c.id == id)).filter(Boolean);
+        } else {
+            let c = myCharacters.find(c => c.id == currentChatSessionId);
+            if (c) targetChars = [c];
+        }
+
+        let mentionedChars = [];
+        if (isGroup) {
+            mentionedChars = targetChars.filter(char => {
+                let handleNoAt = (char.handle || '').replace('@', '').toLowerCase();
+                return text.includes('@' + char.name) || (handleNoAt && text.toLowerCase().includes('@' + handleNoAt));
+            });
+        }
+
+        const container = document.getElementById('chatMessagesArea');
+        let anyCharReplied = false;
+        
+        for (let char of targetChars) {
+            const isMentioned = mentionedChars.some(m => m.id === char.id);
+
+            let recentHistory = globalChats[currentChatSessionId].slice(-10).map(m => {
+                let senderName = m.sender === 'me' ? currentUser.name : (myCharacters.find(c=>c.id==m.sender)?.name || '未知');
+                return `${senderName}: ${m.text}`;
+            }).join('\n');
+            
+            let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+            
+            let replyRule;
+            if (isMentioned) {
+                replyRule = `用户在这条消息里 @ 了你，你【必须】回复，不能输出"NO"。如果按你的人设你本来不太想理人/不爱说话，就用简短、符合人设的话敷衍回应一句，但绝不能不回复。`;
+            } else if (isGroup) {
+                replyRule = `如果觉得无需你回复，直接输出"NO"（必须严格只有这两个字母）。`;
+            } else {
+                replyRule = `如果不知道怎么回也可以输出"NO"。`;
+            }
+            
+            let prompt = `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}
+以下是我们${isGroup?'群里':''}最近的聊天记录：
+${recentHistory}
+
+请根据你的性格直接回复最新消息。${replyRule}
+${emoPrompt}
+如果要带图片/表情包，请在文本最后附上 [EMO:对应ID]。不要有多余的动作描写或心理描写，直接输出说话内容。字数50字以内。`;
+
+            try {
+                let typingId = 'typing_' + char.id + Date.now();
+                container.innerHTML += `<div class="chat-msg-row other" id="${typingId}">${getAvatarHTML(char, 40)}<div class="chat-bubble-wrapper"><div class="chat-bubble other">...</div></div></div>`;
+                container.scrollTop = container.scrollHeight;
+
+                let res = await fetch(`${myApiUrl}/chat/completions`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, 
+                    body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] }) 
+                });
+                let data = await res.json();
+                let repText = data.choices?.[0]?.message?.content?.trim() || "";
+                
+                document.getElementById(typingId)?.remove();
+
+                if (isMentioned && repText.toUpperCase().startsWith("NO") && repText.length < 5) {
+                    repText = (char.autoReplyText && char.autoReplyText.trim()) ? char.autoReplyText.trim() : "嗯，我看到了。";
+                } else if (!isMentioned && repText.toUpperCase().startsWith("NO") && repText.length < 5) {
+                    continue; 
+                }
+
+                let repMediaUrl = null;
+                let emoMatch = repText.match(/\[EMO:(emo_\w+)\]/i);
+                if (emoMatch) {
+                    let emo = globalEmoticons.find(e => e.id === emoMatch[1]);
+                    if (emo) repMediaUrl = emo.url;
+                    repText = repText.replace(emoMatch[0], '').trim();
+                }
+                if (!repText) repText = (char.autoReplyText && char.autoReplyText.trim()) ? char.autoReplyText.trim() : (isMentioned ? "嗯。" : "");
+
+                if (repText || repMediaUrl) {
+                    globalChats[currentChatSessionId].push({ sender: char.id, text: repText, timestamp: Date.now(), mediaUrl: repMediaUrl, readBy: [] });
+                    anyCharReplied = true;
+                    renderChatMessages();
+                    saveAllData();
+                    checkAndAutoSummarizeChat(currentChatSessionId);
+                }
+            } catch(e) { document.getElementById('typingId')?.remove(); }
+        }
+
+        if (anyCharReplied) {
+            let myMsgsToMark = isGroup ? targetChars.map(c => String(c.id)) : [String(targetChars[0]?.id)].filter(Boolean);
+            globalChats[currentChatSessionId].forEach(m => {
+                if (m.sender === 'me') {
+                    if (!m.readBy) m.readBy = [];
+                    myMsgsToMark.forEach(cid => { if (!m.readBy.includes(cid)) m.readBy.push(cid); });
+                }
+            });
+            renderChatMessages();
+            saveAllData();
+        }
+    }
+
+    function openCreateGroupModal() {
+        const c = document.getElementById('groupChatCharPicker');
+        c.innerHTML = myCharacters.map(char => `
+            <div class="char-checkbox-item">
+                <input type="checkbox" id="gpick_${char.id}" value="${char.id}">
+                <label for="gpick_${char.id}">${getAvatarHTML(char, 28)} ${char.name}</label>
+            </div>`).join('');
+        document.getElementById('newGroupChatName').value = '';
+        document.getElementById('newGroupAvatarFile').value = '';
+        openModal('createGroupChatModal');
+    }
+    
+    async function saveGroupChat() {
+        let name = document.getElementById('newGroupChatName').value.trim();
+        let selected = [...document.querySelectorAll('#groupChatCharPicker input[type=checkbox]:checked')].map(cb => parseInt(cb.value));
+        if(!name) return alert("请输入群聊名称");
+        if(selected.length < 2) return alert("群聊至少需要选择两个角色");
+        
+        let avatarB64 = null;
+        let fileInput = document.getElementById('newGroupAvatarFile');
+        if (fileInput.files && fileInput.files.length > 0) {
+            try { avatarB64 = await fileToBase64(fileInput.files[0]); } catch (e) { console.error(e); }
+        }
+        
+        let newG = { id: 'g_' + Date.now(), name: name, members: selected, avatarImg: avatarB64 };
+        groupChats.push(newG);
+        closeModal('createGroupChatModal');
+        saveAllData();
+        renderChatCharList();
+        switchChatSession(newG.id);
+    }
+
+    // ======================================================
+    // ===== 表情/图片库管理 =====
+    // ======================================================
+    let emoticonPickerTarget = null; 
+    let emoticonPickerParam = null;  
+
+    function renderEmoticonManagerGallery() {
+        const c = document.getElementById('emoticonManagerGallery');
+        if(globalEmoticons.length === 0) { c.innerHTML = '<div style="grid-column:1/-1; color:#536471;">暂无表情/图片，快去上传吧~</div>'; return; }
+        c.innerHTML = globalEmoticons.map((e, idx) => `
+            <div class="emo-item">
+                <img src="${e.url}" alt="emo">
+                <button class="emo-del-btn" onclick="deleteEmoticon(${idx})">×</button>
+            </div>
+        `).join('');
+    }
+
+    async function handleEmoticonUpload(event) {
+        const files = Array.from(event.target.files); if (!files.length) return;
+        if (files.length > 99) { alert('单次最多只能添加99张图片！已自动截取前99张。'); }
+        const filesToProcess = files.slice(0, 99);
+        for(let file of filesToProcess) { let b64 = await fileToBase64(file); globalEmoticons.push({ id: 'emo_' + Date.now() + Math.floor(Math.random()*1000), url: b64 }); }
+        renderEmoticonManagerGallery(); event.target.value = ''; saveAllData();
+    }
+
+    function addEmoticonByUrl() {
+        const url = document.getElementById('emoUrlInput').value.trim(); if(!url) return;
+        globalEmoticons.push({ id: 'emo_' + Date.now() + Math.floor(Math.random()*1000), url: url });
+        document.getElementById('emoUrlInput').value = ''; renderEmoticonManagerGallery(); saveAllData();
+    }
+
+    function deleteEmoticon(idx) {
+        if(!confirm('删除这张表情/图片？')) return;
+        globalEmoticons.splice(idx, 1); renderEmoticonManagerGallery();
+        saveAllData();
+    }
+
+    function openEmoticonPicker(target, param = null) {
+        emoticonPickerTarget = target; emoticonPickerParam = param;
+        const c = document.getElementById('emoticonPickerGallery');
+        if(globalEmoticons.length === 0) { c.innerHTML = '<div style="grid-column:1/-1; color:#536471;">暂无表情/图片。请先从左侧菜单进入【表情】库上传。</div>'; } 
+        else { c.innerHTML = globalEmoticons.map(e => `<div class="emo-item" onclick="selectEmoticon('${e.url}')"><img src="${e.url}"></div>`).join(''); }
+        openModal('emoticonPickerModal');
+    }
+
+    function selectEmoticon(url) {
+        if (emoticonPickerTarget === 'post') {
+            pendingPostAttachment = url; const pre = document.getElementById('postAttachmentPreview');
+            pre.innerHTML = `<img src="${url}" class="emo-preview-img"><button class="emo-clear-btn" onclick="clearAttachment('post')">×</button>`; pre.style.display = 'block';
+        } else if (emoticonPickerTarget === 'reply') {
+            pendingReplyAttachment = url; const pre = document.getElementById('replyAttachmentPreview');
+            pre.innerHTML = `<img src="${url}" class="emo-preview-img"><button class="emo-clear-btn" onclick="clearAttachment('reply')">×</button>`; pre.style.display = 'block';
+        } else if (emoticonPickerTarget === 'inline') {
+            pendingInlineAttachments[emoticonPickerParam] = url; const pre = document.getElementById(`inlineAttachmentPreview-${emoticonPickerParam}`);
+            pre.innerHTML = `<img src="${url}" class="emo-preview-img"><button class="emo-clear-btn" onclick="clearAttachment('inline', '${emoticonPickerParam}')">×</button>`; pre.style.display = 'block';
+        } else if (emoticonPickerTarget === 'chat') {
+            pendingChatAttachment = url; const pre = document.getElementById('chatAttachmentPreview');
+            pre.innerHTML = `<img src="${url}" class="emo-preview-img"><button class="emo-clear-btn" onclick="clearAttachment('chat')">×</button>`; pre.style.display = 'block';
+        }
+        closeModal('emoticonPickerModal');
+    }
+
+    function clearAttachment(target, param = null) {
+        if (target === 'post') { pendingPostAttachment = null; document.getElementById('postAttachmentPreview').style.display = 'none'; }
+        else if (target === 'reply') { pendingReplyAttachment = null; document.getElementById('replyAttachmentPreview').style.display = 'none'; }
+        else if (target === 'inline') { pendingInlineAttachments[param] = null; document.getElementById(`inlineAttachmentPreview-${param}`).style.display = 'none'; }
+        else if (target === 'chat') { pendingChatAttachment = null; document.getElementById('chatAttachmentPreview').style.display = 'none'; }
+    }
+
+    function getEmoticonPrompt() {
+        if(globalEmoticons.length === 0) return '';
+        const ids = globalEmoticons.map(e => e.id).join(', ');
+        return `\n【可用表情包/图片 ID 列表】：[${ids}]。`;
+    }
+
+    // ======================================================
+    // ===== 世界书管理 =====
+    // ======================================================
+    function renderWorldbookCards() {
+        const container = document.getElementById('worldbookContainer');
+        if(worldbooks.length === 0) { container.innerHTML = '<div class="empty-state" style="padding:20px;">暂无世界书，请添加设定</div>'; return; }
+        container.innerHTML = worldbooks.map((w, i) => `
+            <div class="wb-card ${w.active ? 'active' : ''}">
+                <button style="position:absolute; top:4px; right:4px; background:none; border:none; color:#f91880; cursor:pointer; font-size:16px;" onclick="deleteWorldbook(${i})">×</button>
+                <div class="wb-title">${w.title}</div>
+                <div class="wb-content">${w.content}</div>
+                <button class="wb-toggle ${w.active ? '' : 'off'}" onclick="toggleWorldbook(${i})">${w.active ? '🟢 正在生效' : '⚪ 未启用'}</button>
+            </div>
+        `).join('');
+    }
+
+    function addWorldbook() {
+        const title = document.getElementById('newWbTitle').value.trim(); const content = document.getElementById('newWbContent').value.trim();
+        if(!title || !content) return alert("请完整填写标题和内容");
+        worldbooks.push({ id: Date.now(), title, content, active: true });
+        document.getElementById('newWbTitle').value = ''; document.getElementById('newWbContent').value = ''; renderWorldbookCards();
+        saveAllData();
+    }
+    function deleteWorldbook(idx) { if(!confirm("确定要删除这本世界书吗？")) return; worldbooks.splice(idx, 1); renderWorldbookCards(); saveAllData(); }
+    function toggleWorldbook(idx) { worldbooks[idx].active = !worldbooks[idx].active; renderWorldbookCards(); saveAllData(); }
+    function getActiveWorldbookText() {
+        let active = worldbooks.filter(w => w.active); if (active.length === 0) return "";
+        return `【当前世界设定背景】：\n` + active.map(w => `- ${w.title}: ${w.content}`).join('\n') + `\n请结合以上世界设定背景和你的性格参与。\n\n`;
+    }
+
+    // ======================================================
+    // ===== 分组管理 =====
+    // ======================================================
+    function openGroupManagerModal() { renderGroupList(); closeModal('characterCenterModal'); openModal('groupManagerModal'); }
+    function renderGroupList() {
+        const c = document.getElementById('groupListContainer');
+        if (characterGroups.length === 0) { c.innerHTML = '<div style="color:#536471; font-size:13px; padding:8px 0;">暂无分组，添加一个吧！</div>'; return; }
+        c.innerHTML = characterGroups.map((g, i) => `
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eff3f4;">
+                <span style="font-size:15px; display:flex; align-items:center; gap:8px;">
+                    <svg class="blue-line-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
+                    <input type="text" value="${g}" style="border:1px solid transparent; background:transparent; font-size:15px; width:150px; outline:none; color:#1d9bf0;" 
+                        onfocus="this.style.border='1px solid #1d9bf0'; this.style.borderRadius='4px';" onblur="this.style.border='1px solid transparent'; editGroup(${i}, this.value)">
+                    <span style="color:#536471; font-size:12px;">(${myCharacters.filter(c=>c.group===g).length} 人)</span>
+                </span>
+                <button onclick="deleteGroup(${i})" style="background:none; border:none; color:#f91880; cursor:pointer; font-size:18px; padding:2px 6px;">×</button>
+            </div>`).join('');
+    }
+    function addGroup() { const val = document.getElementById('newGroupInput').value.trim(); if (!val) return; if (characterGroups.includes(val)) return alert("分组已存在！"); characterGroups.push(val); document.getElementById('newGroupInput').value = ''; renderGroupList(); saveAllData(); }
+    function editGroup(idx, newVal) { newVal = newVal.trim(); if (!newVal || newVal === characterGroups[idx]) { renderGroupList(); return; } if (characterGroups.includes(newVal)) { alert("分组名已存在"); renderGroupList(); return; } const oldGroup = characterGroups[idx]; characterGroups[idx] = newVal; myCharacters.forEach(c => { if (c.group === oldGroup) c.group = newVal; }); renderGroupList(); refreshGroupFilterBar(); saveAllData(); }
+    function deleteGroup(idx) { const groupName = characterGroups[idx]; if (!confirm(`删除分组"${groupName}"？该分组下的角色将变为无分组。`)) return; myCharacters.forEach(c => { if (c.group === groupName) c.group = ''; }); characterGroups.splice(idx, 1); renderGroupList(); saveAllData(); }
+    function filterByGroup(g) { activeGroupFilter = g; renderCenterCharList(); }
+    function refreshGroupFilterBar() {
+        const bar = document.getElementById('groupFilterBar');
+        const tags = [{ label: '全部', val: null, color: 'white' }, ...characterGroups.map(g => ({ label: g, val: g, color: 'white' }))];
+        bar.innerHTML = tags.map(t => `<span class="group-tag" style="background:${activeGroupFilter === t.val ? '#1d9bf0' : t.color}; color:${activeGroupFilter === t.val ? 'white' : '#1d9bf0'}; border:1px solid #1d9bf0;" onclick="filterByGroup(${t.val === null ? 'null' : `'${t.val}'`})">${t.label}</span>`).join('');
+    }
+    function refreshGroupSelect() { const sel = document.getElementById('charGroup'); sel.innerHTML = '<option value="">-- 无分组 --</option>' + characterGroups.map(g => `<option value="${g}">${g}</option>`).join(''); }
+
+    // ======================================================
+    // ===== 角色记忆总结 (帖子) =====
+    // ======================================================
+    function getCharRecentPosts(charId, limit = 20) { return globalPosts.filter(p => p.char.id == charId && !p.isStory).slice(0, limit); }
+    function openMemoryModal(charId) {
+        const char = myCharacters.find(c => c.id == charId); if (!char) return; memoryViewingCharId = charId;
+        document.getElementById('memoryModalTitle').innerText = `📖 ${char.name} 的记忆总结`;
+        const contentWrapper = document.getElementById('memoryContentWrapper');
+        contentWrapper.innerHTML = `<textarea id="memoryEditArea" class="memory-edit-area" placeholder="在此输入或让AI为您总结...">${char.memorySummary || ''}</textarea>`;
+        const recentPosts = getCharRecentPosts(charId, 20);
+        const postListHtml = recentPosts.length > 0 ? recentPosts.map(p => `
+            <div class="char-checkbox-item" style="padding:4px; margin-bottom:4px;">
+                <input type="checkbox" class="memory-post-cb" value="${p.id}" checked>
+                <label style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1d9bf0;" title="${p.text}">${p.text}</label>
+            </div>`).join('') : '<div style="color:#536471;">暂无可用于总结的帖子。</div>';
+        document.getElementById('memoryPostList').innerHTML = postListHtml; openModal('memoryModal');
+    }
+    function saveCharMemory() { const char = myCharacters.find(c => c.id == memoryViewingCharId); if (!char) return; char.memorySummary = document.getElementById('memoryEditArea').value.trim(); saveAllData(); alert('记忆已成功保存！'); }
+    async function refreshCharMemory() {
+        if (!myApiKey) return alert("请先配置 API Key！"); const char = myCharacters.find(c => c.id == memoryViewingCharId); if (!char) return;
+        const cbList = document.querySelectorAll('.memory-post-cb:checked'); const selectedIds = Array.from(cbList).map(cb => cb.value);
+        const selectedPosts = globalPosts.filter(p => selectedIds.includes(p.id.toString())); if (selectedPosts.length === 0) return alert("请至少勾选一条帖子用于总结！");
+        const btn = document.getElementById('refreshMemoryBtn'); btn.innerText = "生成总结中..."; btn.disabled = true;
+        const texts = selectedPosts.map(p => p.text);
+        const prompt = `你是记忆管理AI。以下是推特用户"${char.name}"（人设：${char.persona}）最近发布的帖子：\n${texts.map((t, i) => `${i+1}. ${t}`).join('\n')}\n请用100字以内，总结这个角色近期的关注点、情绪状态、常聊话题，以第三人称写。不要列举具体帖子，要提炼规律性的特点。`;
+        try {
+            const res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }], max_tokens: 200 }) });
+            const data = await res.json(); const summary = data.choices?.[0]?.message?.content?.trim() || "总结失败，请重试。";
+            document.getElementById('memoryEditArea').value = summary; char.memorySummary = summary; saveAllData();
+        } catch(e) { alert("总结失败：" + e.message); }
+        btn.innerText = "🔄 重新总结"; btn.disabled = false;
+    }
+    async function updateCharMemoryAsync(char) {
+        if (!myApiKey) return; const posts = getCharRecentPosts(char.id, 20); if (posts.length < 3) return; 
+        const prompt = `你是记忆管理AI。总结以下推特用户"${char.name}"（人设：${char.persona}）的帖子规律(100字内)：\n${posts.map((p, i) => `${i+1}. ${p.text}`).join('\n')}`;
+        try {
+            const res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }], max_tokens: 200 }) });
+            const data = await res.json(); char.memorySummary = data.choices?.[0]?.message?.content?.trim() || char.memorySummary; saveAllData();
+        } catch(e) {}
+    }
+
+    // ======================================================
+    // ===== 自动发帖 =====
+    // ======================================================
+    function startAutoPostTimer() {
+        setInterval(async () => {
+            if (!myApiKey || isGenerating) return;
+            let now = Date.now(); let charsToPost = [];
+            for (let char of myCharacters) {
+                let msMulti = char.postFreq.unit === 'minute' ? 60000 : char.postFreq.unit === 'hour' ? 3600000 : 86400000;
+                let reqMs = char.postFreq.interval * msMulti;
+                if (!char.lastPostTime) char.lastPostTime = now;
+                if (now - char.lastPostTime >= reqMs) { char.lastPostTime = now; for(let k=0; k<char.postFreq.count; k++) charsToPost.push(char); }
+            }
+            if (charsToPost.length > 0) { const batch = charsToPost.slice(0, 3); await executeGeneration(batch); }
+        }, 15000);
+    }
+
+    // ======================================================
+    // ===== 角色主动发起私聊消息 =====
+    // ======================================================
+    let isProactiveChatRunning = false;
+    function startProactiveChatTimer() {
+        setInterval(async () => {
+            if (!myApiKey || isProactiveChatRunning) return;
+            let now = Date.now();
+            let due = myCharacters.filter(char => {
+                if (!char.chatFreq || !char.chatFreq.interval || char.chatFreq.interval <= 0) return false;
+                let msMulti = char.chatFreq.unit === 'minute' ? 60000 : char.chatFreq.unit === 'hour' ? 3600000 : 86400000;
+                let reqMs = char.chatFreq.interval * msMulti;
+                if (!char.lastChatProactiveTime) char.lastChatProactiveTime = now;
+                return now - char.lastChatProactiveTime >= reqMs;
+            });
+            if (due.length === 0) return;
+            isProactiveChatRunning = true;
+            for (let char of due.slice(0, 2)) {
+                char.lastChatProactiveTime = now;
+                await sendProactiveChatMessage(char);
+            }
+            isProactiveChatRunning = false;
+            saveAllData();
+        }, 20000);
+    }
+
+    async function sendProactiveChatMessage(char) {
+        try {
+            let recentPosts = globalPosts.slice(0, 20).map(p => `${p.char.name}: ${p.text}`).join('\n');
+            let session = globalChats[char.id] || [];
+            let recentChat = session.slice(0, 20).map(m => (m.sender === 'me' ? currentUser.name : (myCharacters.find(c=>c.id==m.sender)?.name || char.name)) + ': ' + m.text).join('\n');
+            let wbContext = getActiveWorldbookText();
+            let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+
+            let prompt = `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}
+你现在想主动找用户"${currentUser.name}"私聊，发起一条消息（比如分享近况、提起话题、打招呼等，要符合你的人设语气）。
+参考：最近的推文动态：
+${recentPosts || '（暂无）'}
+你们之前的聊天记录（最早的20条）：
+${recentChat || '（暂无聊天记录）'}
+请直接输出这条主动消息的内容，不超过40字，不要有动作或心理描写，不要输出"NO"。`;
+
+            let res = await fetch(`${myApiUrl}/chat/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` },
+                body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] })
+            });
+            let data = await res.json();
+            if (data.error) return;
+            let repText = data.choices?.[0]?.message?.content?.trim() || "";
+            if (!repText || repText.toUpperCase() === "NO") return;
+
+            if (!globalChats[char.id]) globalChats[char.id] = [];
+            globalChats[char.id].push({ sender: char.id, text: repText, timestamp: Date.now(), readBy: [] });
+
+            addNotification(`<b>${char.name}</b> 主动给您发了一条消息`, null, char.id);
+
+            if (currentChatSessionId == char.id && document.getElementById('view-chat').style.display !== 'none') {
+                renderChatMessages();
+            }
+        } catch (e) { console.error('主动发消息失败:', e); }
+    }
+
+    // --- 右键菜单 ---
+    document.addEventListener('click', () => { document.getElementById('customContextMenu').style.display = 'none'; });
+    function showFollowingContextMenu(e, charId) {
+        e.preventDefault(); contextMenuTargetId = charId;
+        const char = myCharacters.find(c => c.id === charId); if(!char) return;
+        const menu = document.getElementById('customContextMenu');
+        document.getElementById('ctxBtnStar').innerText = char.isSpecialFollow ? "取消星标" : "特别关注⭐";
+        menu.style.display = 'flex';
+        let x = e.pageX; let y = e.pageY; if(x + 160 > window.innerWidth) x -= 160; if(y + 100 > window.innerHeight) y -= 100;
+        menu.style.left = x + 'px'; menu.style.top = y + 'px';
+    }
+    function contextActionStar() { if(!contextMenuTargetId) return; let char = myCharacters.find(c => c.id === contextMenuTargetId); if(char) { char.isSpecialFollow = !char.isSpecialFollow; renderFollowingList(); saveAllData(); } }
+    function contextActionUnfollow() { if(!contextMenuTargetId) return; let char = myCharacters.find(c => c.id === contextMenuTargetId); if(char) { char.isFollowing = false; char.isSpecialFollow = false; updateAllFollowButtons(char.id, false); renderFollowingList(); saveAllData(); } }
+    function updateAllFollowButtons(charId, isFollowing) { document.querySelectorAll(`.btn-follow-${charId}`).forEach(btn => { btn.className = isFollowing ? `follow-btn following btn-follow-${charId}` : `follow-btn btn-follow-${charId}`; btn.innerText = isFollowing ? "已关注" : "关注"; }); }
+
+    // --- 修改及删除帖子 ---
+    function editPost(postId, el) {
+        let post = globalPosts.find(p => p.id == postId); if (!post || el.querySelector('textarea')) return;
+        let currentText = post.text;
+        el.innerHTML = `<textarea id="edit-post-input-${postId}" style="width:100%; min-height:80px; font-family:inherit; font-size:15px; padding:10px; border:1px solid #1d9bf0; border-radius:8px; outline:none;" onclick="event.stopPropagation()">${currentText}</textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+                            <button class="btn-edit-small" onclick="savePostEdit('${postId}', event)">保存修改</button>
+                            <button class="btn-edit-small" style="color:#536471; border-color:#cfd9de;" onclick="cancelPostEdit('${postId}', event)">取消</button>
+                        </div>`;
+    }
+    function savePostEdit(postId, e) {
+        e.stopPropagation(); let val = document.getElementById(`edit-post-input-${postId}`).value; let post = globalPosts.find(p => p.id == postId); if (post) post.text = val;
+        saveAllData();
+        if (document.getElementById('view-home').style.display !== 'none') renderPosts(); if (document.getElementById('view-profile').style.display !== 'none') renderProfileFeed(); if (document.getElementById('view-post-detail').style.display !== 'none') renderSinglePostDetail(postId);
+    }
+    function cancelPostEdit(postId, e) {
+        e.stopPropagation();
+        if (document.getElementById('view-home').style.display !== 'none') renderPosts(); if (document.getElementById('view-profile').style.display !== 'none') renderProfileFeed(); if (document.getElementById('view-post-detail').style.display !== 'none') renderSinglePostDetail(postId);
+    }
+    function deletePost(postId, event) {
+        event.stopPropagation();
+        if(confirm('确定要删除这条帖子吗？该操作不可逆！')) { 
+            globalPosts = globalPosts.filter(p => p.id != postId); 
+            saveAllData();
+            if(document.getElementById('view-home').style.display !== 'none') renderPosts(); 
+            if(document.getElementById('view-profile').style.display !== 'none') renderProfileFeed(); 
+        }
+    }
+
+    // 发布评论功能
+    async function postUserComment(postId) {
+        const input = document.getElementById('myCommentInput');
+        if (!input) return;
+        const text = input.value ? input.value.trim() : "";
+        if (!text && !pendingReplyAttachment) return alert("评论内容不能为空！");
+        
+        let post = globalPosts.find(p => p.id == postId);
+        if (!post) return;
+
+        const newReply = { 
+            char: { ...currentUser }, 
+            text: text, 
+            timestamp: Date.now(), 
+            likes: 0, 
+            liked: false,
+            mediaUrl: pendingReplyAttachment
+        };
+
+        if (!post.replies) post.replies = [];
+        post.replies.push(newReply); 
+        post.stats.comments = (parseInt(post.stats.comments) || 0) + 1;
+        input.value = ''; clearAttachment('reply'); 
+        renderSinglePostDetail(postId);
+        saveAllData();
+
+        if (!myApiKey) return;
+        
+        let wbContext = getActiveWorldbookText(); let emoPrompt = getEmoticonPrompt();
+        
+        for (let char of myCharacters) {
+            const isCool = isCoolPersona(char.persona); let isPostAuthor = (char.id === post.char.id); 
+            
+            let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+            
+            let prompt = "";
+            if (isPostAuthor) { prompt = `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}${emoPrompt}用户在你的帖子下评论了："${text}"。你必须回复用户的评论，直接输出具体内容（不超过30字），若要在回复中带表情包，请在文本最后附上 [EMO:对应ID]。不要输出"NO"。`; } 
+            else { prompt = isCool ? `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}用户在别人的帖子下评论："${text}"。是否点赞？输出"LIKE"或"NO"。` : `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}${emoPrompt}用户在帖子下评论了："${text}"。是否回复（不超过20字）？若要在回复中带表情包，请在文本最后附上 [EMO:对应ID]。不回复输出"NO"。`; }
+            try {
+                let res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] }) });
+                let data = await res.json(); let repText = data.choices?.[0]?.message?.content?.trim() || "";
+                
+                let repMediaUrl = null; let emoMatch = repText.match(/\[EMO:(emo_\w+)\]/i);
+                if (emoMatch) { let emo = globalEmoticons.find(e => e.id === emoMatch[1]); if (emo) repMediaUrl = emo.url; repText = repText.replace(emoMatch[0], '').trim(); }
+                if (isPostAuthor && repText.toUpperCase().startsWith("NO") && repText.length < 5) { repText = "看到了。"; }
+                
+                if (repText.toUpperCase() === 'LIKE') { newReply.likes = (newReply.likes || 0) + 1; addNotification(`<b>${char.name}</b> 赞了您的评论 ❤️`, postId); } 
+                else if (!repText.toUpperCase().startsWith("NO") && repText !== "") { post.replies.push({ char: char, text: repText, timestamp: Date.now(), likes: 0, liked: false, replyTo: currentUser.name, mediaUrl: repMediaUrl }); post.stats.comments++; addNotification(`<b>${char.name}</b> 回复了您的评论`, postId); }
+                renderSinglePostDetail(postId);
+                saveAllData();
+            } catch(e) {}
+        }
+    }
+
+    // --- 视图切换 ---
+    function hideAllViews() {
+        ['home','profile','tag','search','notifications','post-detail','following-list','chat'].forEach(v => { const el = document.getElementById(`view-${v}`); if(el) el.style.display = 'none'; });
+        ['nav-home','nav-following','nav-notif','nav-myprofile','nav-chat'].forEach(id => { const el = document.getElementById(id); if(el) el.className = 'nav-item'; });
+        document.getElementById('rightPanelTrend').style.display = 'block'; document.getElementById('rightPanelProfile').style.display = 'none';
+    }
+    function switchMainView(viewId, param = null) {
+        hideAllViews();
+        if (viewId === 'home') { document.getElementById('view-home').style.display = 'block'; document.getElementById('nav-home').className = 'nav-item active'; renderPosts(); }
+        else if (viewId === 'profile') { document.getElementById('view-profile').style.display = 'block'; if(param === 'me') document.getElementById('nav-myprofile').className = 'nav-item active'; renderProfilePage(param); }
+        else if (viewId === 'tag') { document.getElementById('view-tag').style.display = 'block'; document.getElementById('currentTagTitle').innerText = param; renderPosts(param); }
+        else if (viewId === 'search') { document.getElementById('view-search').style.display = 'block'; document.getElementById('currentSearchTitle').innerText = param; document.getElementById('globalSearchInput').value = ''; renderSearchPosts(param); }
+        else if (viewId === 'notifications') { document.getElementById('view-notifications').style.display = 'block'; document.getElementById('nav-notif').className = 'nav-item active'; unreadNotifs = 0; updateNotifBadge(); renderNotifications(); }
+        else if (viewId === 'postDetail') { document.getElementById('view-post-detail').style.display = 'block'; renderSinglePostDetail(param); }
+        else if (viewId === 'followingList') { document.getElementById('view-following-list').style.display = 'block'; document.getElementById('nav-following').className = 'nav-item active'; renderFollowingList(); }
+        else if (viewId === 'chat') { 
+            document.getElementById('view-chat').style.display = 'flex'; 
+            document.getElementById('nav-chat').className = 'nav-item active'; 
+            renderChatCharList(); 
+            if(!currentChatSessionId && myCharacters.length>0) switchChatSession(myCharacters[0].id);
+            else if(currentChatSessionId) renderChatMessages();
+        }
+    }
+    function switchHomeTab(t) { homeTab = t; document.getElementById('tab-recommend').className = t === 'recommend' ? 'tab active' : 'tab'; document.getElementById('tab-following').className = t === 'following' ? 'tab active' : 'tab'; renderPosts(); }
+    
+    function clickHome() { 
+        switchMainView('home'); 
+        if(!isGenerating && myApiKey) { 
+            let c = myCharacters[Math.floor(Math.random() * myCharacters.length)]; 
+            if(c) {
+                executeGeneration([c]); 
+            }
+        } 
+    }
+    
+    function switchProfileTab(t) { currentProfileTab = t; document.querySelectorAll('#view-profile .top-tabs .tab').forEach(el => el.classList.remove('active')); document.getElementById(`prof-tab-${t}`).classList.add('active'); renderProfileFeed(); }
+
+    function renderProfilePage(charId) {
+        currentProfileId = charId; currentProfileTab = 'posts';
+        document.querySelectorAll('#view-profile .top-tabs .tab').forEach(el => el.classList.remove('active')); document.getElementById('prof-tab-posts').classList.add('active');
+        let char = charId === 'me' ? currentUser : myCharacters.find(c => c.id == charId); if (!char) return;
+        let charPosts = globalPosts.filter(p => p.char.id == charId);
+        document.getElementById('profHeadName').innerHTML = `${char.name} ${char.verified ? verifiedSVG : ''}`; document.getElementById('profHeadPosts').innerText = `${charPosts.length} 帖子`;
+        let bgStyle = char.bgImg ? `background-image:url('${char.bgImg}'); background-size:cover; background-position:center;` : `background-color:${char.themeColor || '#f0f8ff'};`;
+        document.getElementById('profBanner').style.cssText = bgStyle; document.getElementById('profAvatarWrap').innerHTML = getAvatarHTML(char, 134, 'profile-avatar-large');
+        let btn = document.getElementById('profFollowBtn');
+        if (charId === 'me') { btn.style.display = 'none'; } else { btn.style.display = 'block'; btn.className = char.isFollowing ? `follow-btn following btn-follow-${char.id}` : `follow-btn btn-follow-${char.id}`; btn.innerText = char.isFollowing ? "已关注" : "关注"; btn.onclick = (e) => toggleFollow(char.id, e); }
+        document.getElementById('profName').innerHTML = `${char.name} ${char.verified ? verifiedSVG : ''} ${char.isSpecialFollow ? '<span class="special-star"><svg class="blue-line-icon" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:middle;margin-top:-2px;"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"></polygon></svg></span>' : ''}`;
+        document.getElementById('profHandle').innerText = char.handle; document.getElementById('profBio').innerText = char.bio || char.persona || "暂无签名";
+        const locEl = document.getElementById('profLocation'); if (char.location) { locEl.style.display = 'flex'; locEl.innerHTML = `${locationSVG}<span>${char.location}</span>`; } else { locEl.style.display = 'none'; locEl.innerHTML = ''; }
+        const webEl = document.getElementById('profWebsite'); if (char.website) { webEl.style.display = 'flex'; webEl.innerHTML = `${websiteSVG}<a href="#" style="color:#1d9bf0; text-decoration:none;">${char.website.replace(/^https?:\/\//, '')}</a>`; } else { webEl.style.display = 'none'; webEl.innerHTML = ''; }
+        document.getElementById('profBirthdate').innerText = char.birthdate ? char.birthdate.substring(0, 4) + "年" : "未知时间";
+        document.getElementById('profFollowing').innerText = char.following || 0; document.getElementById('profFollowers').innerText = char.followers || 0;
+        renderProfileFeed();
+    }
+
+    function renderProfileFeed() {
+        const container = document.getElementById('profileFeedSection'); let postsToShow = [];
+        if (currentProfileTab === 'posts') postsToShow = globalPosts.filter(p => p.char.id == currentProfileId);
+        else if (currentProfileTab === 'replies') postsToShow = globalPosts.filter(p => p.replies && p.replies.some(r => r.char.id == currentProfileId));
+        else if (currentProfileTab === 'highlights') postsToShow = globalPosts.filter(p => p.char.id == currentProfileId && parseStat(p.stats.views) >= 100000);
+        else if (currentProfileTab === 'media') postsToShow = globalPosts.filter(p => p.char.id == currentProfileId && p.mediaUrl);
+        if (postsToShow.length === 0) { container.innerHTML = `<div class="empty-state">这里空空如也</div>`; return; }
+        container.innerHTML = generatePostHTML(postsToShow);
+    }
+
+    function renderFollowingList() {
+        const container = document.getElementById('followingListContainer'); let follows = myCharacters.filter(c => c.isFollowing).sort((a,b) => b.isSpecialFollow - a.isSpecialFollow);
+        if(follows.length === 0) { container.innerHTML = `<div class="empty-state">您还没有关注任何人哦。</div>`; return; }
+        container.innerHTML = follows.map(char => `
+            <div class="following-card" oncontextmenu="showFollowingContextMenu(event, ${char.id})" onclick="switchMainView('profile', ${char.id})">
+                ${getAvatarHTML(char, 60)}
+                <div style="font-weight:bold; font-size:15px; margin-bottom:5px;">${char.name} ${char.verified ? verifiedSVG : ''} ${char.isSpecialFollow ? '<span class="special-star"><svg class="blue-line-icon" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:middle;margin-top:-2px;"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"></polygon></svg></span>' : ''}</div>
+                <div style="color:#536471; font-size:13px;">${char.handle}</div>
+                ${char.group ? `<span style="display:inline-block; margin-top:4px; background:rgba(29,155,240,0.1); color:#1d9bf0; border-radius:9999px; font-size:11px; padding:1px 7px;">${char.group}</span>` : ''}
+            </div>`).join('');
+    }
+
+    function formatPostText(text) { return text.replace(/#(\S+)/g, '<span class="clickable-tag" onclick="switchMainView(\'tag\', \'#$1\'); event.stopPropagation();">#$1</span>').replace(/@(\w+)/g, '<span class="mention-tag">@$1</span>'); }
+
+    function togglePostLike(postId, el) {
+        const post = globalPosts.find(p => p.id == postId); if (!post) return; post.userLiked = !post.userLiked;
+        post.stats.likes = Math.max(0, parseStat(post.stats.likes) + (post.userLiked ? 1 : -1));
+        if (post.userLiked) { el.className = 'liked-stat stat-item'; el.innerHTML = likeSVGFilled + ` <span class="like-count">${formatStat(post.stats.likes)}</span>`; }
+        else { el.className = 'stat-item'; el.innerHTML = likeSVG + ` <span class="like-count">${formatStat(post.stats.likes)}</span>`; }
+        el.setAttribute('onclick', `event.stopPropagation(); togglePostLike('${postId}', this)`);
+        saveAllData();
+    }
+
+    function toggleFollow(charId, e) {
+        if(e) e.stopPropagation(); let char = myCharacters.find(c => c.id == charId); if(!char) return; char.isFollowing = !char.isFollowing;
+        if (!char.isFollowing) char.isSpecialFollow = false; updateAllFollowButtons(charId, char.isFollowing);
+        saveAllData();
+    }
+
+    function generatePostHTML(postArray) {
+        return postArray.map(post => {
+            let char = post.char; let charData = myCharacters.find(c => c.id == char.id);
+            let btnClass = (charData || char).isFollowing ? "follow-btn following" : "follow-btn";
+            let followBtnHTML = char.id !== 'me' ? `<button class="${btnClass} btn-follow-${char.id}" onclick="toggleFollow(${char.id}, event)">${(charData || char).isFollowing ? "已关注" : "关注"}</button>` : '';
+            let mediaHTML = post.mediaUrl ? `<div class="post-media"><img src="${post.mediaUrl}"></div>` : '';
+            let locationHTML = post.location ? `<div class="post-location">${locationSVG} ${post.location}</div>` : '';
+            const liked = post.userLiked || false;
+            return `
+                <div class="post-placeholder" onclick="switchMainView('postDetail', '${post.id}')">
+                    <div onclick="switchMainView('profile', '${char.id}'); event.stopPropagation();">${getAvatarHTML(char, 40)}</div>
+                    <div class="post-content">
+                        <div class="post-header">
+                            <div class="post-header-info" onclick="switchMainView('profile', '${char.id}'); event.stopPropagation();">
+                                <span class="post-name">${char.name} ${char.verified ? verifiedSVG : ''} ${(charData||char).isSpecialFollow ? '<span class="special-star"><svg class="blue-line-icon" viewBox="0 0 24 24" style="width:16px;height:16px;vertical-align:middle;margin-top:-2px;"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"></polygon></svg></span>' : ''}</span>
+                                <span class="post-handle">${char.handle}</span>
+                            </div>
+                            <div style="display:flex; align-items:center;">
+                                ${followBtnHTML}
+                                <button class="post-delete-btn" onclick="deletePost('${post.id}', event)" title="删除帖子">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="post-body" ondblclick="editPost('${post.id}', this); event.stopPropagation();" title="双击可直接修改此帖子">${formatPostText(post.text)}</div>
+                        ${locationHTML}
+                        ${mediaHTML}
+                        <div class="post-footer">
+                            <div class="time-updater" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</div>
+                            <div class="post-stats-group">
+                                <div class="stat-item" onclick="event.stopPropagation(); switchMainView('postDetail', '${post.id}')">${commentSVG} ${formatStat(post.stats.comments)}</div>
+                                <div class="stat-item" onclick="event.stopPropagation();">${retweetSVG} ${formatStat(post.stats.retweets)}</div>
+                                <div class="${liked ? 'stat-item liked-stat' : 'stat-item'}" onclick="event.stopPropagation(); togglePostLike('${post.id}', this)">${liked ? likeSVGFilled : likeSVG} <span class="like-count">${formatStat(post.stats.likes)}</span></div>
+                                <div class="stat-item" onclick="event.stopPropagation();">${viewSVG} ${formatStat(post.stats.views)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    function renderTrends() {
+        const container = document.getElementById('trendListContainer');
+        if (!container) return;
+        if (typeof trendingTags === 'undefined') trendingTags = ["#赛博朋克2026", "#科技改变生活"];
+        container.innerHTML = trendingTags.map((tag, idx) => `
+            <div class="trend-item" onclick="switchMainView('search', '${tag}')" ondblclick="editTrend(${idx}, this, event)" title="双击修改标签">
+                <div class="trend-title">${tag}</div>
+                <div class="trend-meta">AI 正在讨论</div>
+            </div>
+        `).join('');
+    }
+
+    function editTrend(idx, el, event) {
+        event.stopPropagation();
+        let currentTag = trendingTags[idx];
+        el.innerHTML = `<input type="text" id="edit-trend-${idx}" value="${currentTag}" class="trend-edit-input" onclick="event.stopPropagation()" onblur="saveTrendEdit(${idx})" onkeypress="if(event.key === 'Enter') saveTrendEdit(${idx})">`;
+        setTimeout(() => document.getElementById(`edit-trend-${idx}`).focus(), 50);
+    }
+
+    function saveTrendEdit(idx) {
+        let input = document.getElementById(`edit-trend-${idx}`);
+        if (!input) return;
+        let val = input.value.trim();
+        if (val) {
+            trendingTags[idx] = val.startsWith('#') ? val : '#' + val;
+        } else {
+            trendingTags.splice(idx, 1);
+        }
+        renderTrends();
+        saveAllData();
+    }
+
+    function addCustomTrend() {
+        const input = document.getElementById('customTrendInput');
+        const val = input.value.trim();
+        if (!val) return;
+        if (typeof trendingTags === 'undefined') trendingTags = [];
+        trendingTags.push(val.startsWith('#') ? val : '#' + val);
+        input.value = '';
+        renderTrends(); 
+        saveAllData(); 
+    }
+
+    function renderPosts(filterTag = null) {
+        const container = filterTag ? document.getElementById('tagFeedSection') : document.getElementById('feedSection');
+        let postsToShow = filterTag ? globalPosts.filter(p => p.text.includes(filterTag)) : (homeTab === 'following' ? globalPosts.filter(p => p.char.id !== 'me' && myCharacters.find(c=>c.id==p.char.id)?.isFollowing) : globalPosts);
+        if (postsToShow.length === 0) { container.innerHTML = `<div class="empty-state">这里空空如也...</div>`; return; }
+        container.innerHTML = generatePostHTML(postsToShow);
+    }
+
+    function renderSearchPosts(keyword) {
+        let kw = keyword.toLowerCase(); let searchRes = globalPosts.filter(p => p.text.toLowerCase().includes(kw) || p.char.name.toLowerCase().includes(kw) || p.char.handle.toLowerCase().includes(kw));
+        document.getElementById('searchFeedSection').innerHTML = searchRes.length ? generatePostHTML(searchRes) : '<div class="empty-state">未找到相关帖子</div>';
+    }
+
+    function isCoolPersona(persona) { const coolKeywords = ['高冷', '内向', '冷淡', '寡言', '沉默', '冷漠', '不善言辞', '宅', '独来独往', '不爱说话']; return coolKeywords.some(kw => persona.includes(kw)); }
+
+    async function userPost() {
+        let input = document.getElementById('userPostInput'); let text = input.value.trim(); if (!text && !pendingPostAttachment) return;
+        if (!myApiKey) return alert("请先在设置中配置密钥！");
+        let newPostId = 'u_' + Date.now();
+        let newPost = { id: newPostId, char: { ...currentUser }, text: text, timestamp: Date.now(), replies: [], mediaUrl: pendingPostAttachment, stats: { comments: 0, retweets: 0, likes: 0, views: 0 }, isStory: false };
+        globalPosts.unshift(newPost); input.value = ''; clearAttachment('post'); renderPosts();
+        document.getElementById('loadingStatus').style.display = 'block'; document.getElementById('loadingStatus').innerText = "角色们正在看您的帖子... ⏳";
+        saveAllData(); 
+        
+        let wbContext = getActiveWorldbookText(); let emoPrompt = getEmoticonPrompt();
+        
+        for (let char of myCharacters) {
+            const isCool = isCoolPersona(char.persona);
+            let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+
+            let prompt = isCool
+                ? `你是推特用户"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}用户"${currentUser.name}"发了推文："${text}"。你性格高冷，通常只点赞不回复。输出"LIKE"或直接输出一句话（概率很低）。不要输出其他。`
+                : `你是推特用户"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}${emoPrompt}用户"${currentUser.name}"发了推文："${text}"。如果回复直接输出内容（不超过30字），若要在回复中带表情包，请在文本最后附上 [EMO:对应ID]。不回复输出"NO"。`;
+            try {
+                let res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] }) });
+                let data = await res.json(); let repText = data.choices?.[0]?.message?.content?.trim() || "";
+                
+                let repMediaUrl = null; let emoMatch = repText.match(/\[EMO:(emo_\w+)\]/i);
+                if (emoMatch) { let emo = globalEmoticons.find(e => e.id === emoMatch[1]); if (emo) repMediaUrl = emo.url; repText = repText.replace(emoMatch[0], '').trim(); }
+                if (repText.toUpperCase() === 'LIKE') { newPost.stats.likes = parseStat(newPost.stats.likes) + 1; addNotification(`<b>${char.name}</b> 赞了您的帖子 ❤️`, newPostId); }
+                else if (!repText.toUpperCase().startsWith("NO") && repText !== "") { newPost.replies.push({ char: char, text: repText, timestamp: Date.now(), likes: 0, liked: false, mediaUrl: repMediaUrl }); newPost.stats.comments++; addNotification(`<b>${char.name}</b> 评论了您的帖子`, newPostId); }
+                if (document.getElementById('view-home').style.display !== 'none') renderPosts();
+            } catch(e) {}
+        }
+        document.getElementById('loadingStatus').style.display = 'none';
+        saveAllData();
+    }
+
+    function toggleInlineReply(replyIdx, postId) {
+        const areaId = `inline-reply-${postId}-${replyIdx}`; const existing = document.getElementById(areaId); if (existing) { existing.remove(); return; }
+        const replyItem = document.querySelector(`[data-reply-idx="${replyIdx}"][data-post-id="${postId}"]`); if (!replyItem) return;
+        const area = document.createElement('div'); area.className = 'inline-reply-area'; area.id = areaId;
+        const post = globalPosts.find(p => p.id == postId); const targetReply = post?.replies[replyIdx];
+        area.innerHTML = `
+            <div class="inline-reply-row">
+                ${getAvatarHTML(currentUser, 28)}
+                <input type="text" placeholder="回复 ${targetReply?.char?.name || ''}..." id="inline-input-${postId}-${replyIdx}">
+                <button class="btn-edit-small" title="添加表情/图片" onclick="openEmoticonPicker('inline', '${postId}-${replyIdx}')">🖼️</button>
+                <button onclick="submitInlineReply('${postId}', ${replyIdx})">回复</button>
+            </div>
+            <div id="inlineAttachmentPreview-${postId}-${replyIdx}" class="emo-preview-box" style="display:none; padding-left:0;"></div>
+        `;
+        replyItem.parentNode.insertBefore(area, replyItem.nextSibling); document.getElementById(`inline-input-${postId}-${replyIdx}`).focus();
+    }
+
+    async function submitInlineReply(postId, replyIdx) {
+        const inputEl = document.getElementById(`inline-input-${postId}-${replyIdx}`); if (!inputEl) return;
+        const paramKey = `${postId}-${replyIdx}`; const text = inputEl.value.trim(); if (!text && !pendingInlineAttachments[paramKey]) return;
+        const post = globalPosts.find(p => p.id == postId); if (!post) return; const targetReply = post.replies[replyIdx];
+        const newReply = { char: { ...currentUser }, text: `@${targetReply.char.name} ${text}`, timestamp: Date.now(), likes: 0, liked: false, replyTo: targetReply.char.name, mediaUrl: pendingInlineAttachments[paramKey] };
+        post.replies.push(newReply); post.stats.comments++; clearAttachment('inline', paramKey); renderSinglePostDetail(postId);
+        saveAllData();
+        
+        if (!myApiKey || targetReply.char.id === 'me') return;
+        const char = myCharacters.find(c => c.id === targetReply.char.id); if (!char) return;
+        let wbContext = getActiveWorldbookText(); let emoPrompt = getEmoticonPrompt(); const isCool = isCoolPersona(char.persona);
+        
+        let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+
+        const prompt = isCool 
+            ? `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}${emoPrompt}用户回复了你："${text}"。是否回复？直接输出内容或"NO"。若要在回复中带表情包，请在文本最后附上 [EMO:对应ID]。` 
+            : `你是"${char.name}"，人设：${char.persona}。${wbContext}${chatSummaryContext}${emoPrompt}用户@你："${text}"。请回复（不超过20字）或输出"NO"。若想使用表情，请附带 [EMO:对应ID]。`;
+            
+        try {
+            const res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: prompt }] }) });
+            const data = await res.json(); let repText = data.choices?.[0]?.message?.content?.trim() || "";
+            let repMediaUrl = null; let emoMatch = repText.match(/\[EMO:(emo_\w+)\]/i);
+            if (emoMatch) { let emo = globalEmoticons.find(e => e.id === emoMatch[1]); if (emo) repMediaUrl = emo.url; repText = repText.replace(emoMatch[0], '').trim(); }
+            if (!repText.toUpperCase().startsWith("NO") && repText !== "") { 
+                post.replies.push({ char: char, text: `@${currentUser.name} ${repText}`, timestamp: Date.now(), likes: 0, liked: false, mediaUrl: repMediaUrl }); 
+                post.stats.comments++; addNotification(`<b>${char.name}</b> 回复了您`, postId); renderSinglePostDetail(postId); 
+                saveAllData();
+            }
+        } catch(e) {}
+    }
+
+    function likeReply(postId, replyIdx) {
+        const post = globalPosts.find(p => p.id == postId); if (!post || !post.replies[replyIdx]) return;
+        const r = post.replies[replyIdx]; if (r.liked) { r.liked = false; r.likes = Math.max(0, (r.likes||1) - 1); } else { r.liked = true; r.likes = (r.likes||0) + 1; }
+        const btn = document.querySelector(`[data-like-reply="${postId}-${replyIdx}"]`);
+        if (btn) { btn.className = `reply-like-btn${r.liked ? ' liked' : ''}`; btn.innerHTML = `❤️ ${r.likes > 0 ? r.likes : ''}`; }
+        saveAllData();
+    }
+
+    function renderSinglePostDetail(postId) {
+        let post = globalPosts.find(p => p.id == postId); if(!post) return; let char = post.char;
+        let followBtnHTML = char.id !== 'me' ? `<button class="${char.isFollowing ? "follow-btn following" : "follow-btn"} btn-follow-${char.id}" onclick="toggleFollow(${char.id}, event)">${char.isFollowing ? "已关注" : "关注"}</button>` : '';
+        let repliesHTML = '';
+        if (post.replies && post.replies.length > 0) {
+            repliesHTML = `<div class="replies-container" style="margin-top:20px;">` + post.replies.map((r, idx) => {
+                    const likeBtnClass = `reply-like-btn${r.liked ? ' liked' : ''}`; const likeCount = r.likes > 0 ? r.likes : '';
+                    const profileLink = r.char.id !== 'me' ? `onclick="switchMainView('profile', '${r.char.id}')"` : '';
+                    const replyMediaHTML = r.mediaUrl ? `<div class="post-media" style="margin-top:8px;"><img src="${r.mediaUrl}" style="max-height:200px;"></div>` : '';
+                    return `
+                    <div class="reply-item" data-reply-idx="${idx}" data-post-id="${postId}">
+                        <div class="reply-avatar-link" ${profileLink}>${getAvatarHTML(r.char, 32)}</div>
+                        <div style="flex:1; min-width:0;">
+                            <div class="reply-content">
+                                <div class="reply-name">
+                                    <span>
+                                        <span class="reply-name-link" ${profileLink}>${r.char.name} ${r.char.verified ? verifiedSVG : ''}</span>
+                                        <span style="color:#536471; font-weight:normal; font-size:12px; margin-left:4px;">${r.char.handle}</span>
+                                        ${r.replyTo ? `<span style="color:#536471;font-size:12px;"> · 回复 @${r.replyTo}</span>` : ''}
+                                    </span>
+                                    <button class="${likeBtnClass}" data-like-reply="${postId}-${idx}" onclick="likeReply('${postId}', ${idx}); event.stopPropagation();">❤️ ${likeCount}</button>
+                                </div>
+                                <div style="margin-top:5px; font-size:14px; line-height:1.5;">${formatPostText(r.text)}</div>
+                                ${replyMediaHTML}
+                                <div style="margin-top:6px;">
+                                    <span style="color:#1d9bf0; font-size:12px; cursor:pointer;" onclick="toggleInlineReply(${idx}, '${postId}')">💬 回复</span>
+                                    <span style="color:#536471; font-size:12px; margin-left:10px;" class="time-updater" data-timestamp="${r.timestamp}">${timeAgo(r.timestamp)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('') + `</div>`;
+        }
+        let mediaHTML = post.mediaUrl ? `<div class="post-media" style="margin-bottom:15px;"><img src="${post.mediaUrl}"></div>` : '';
+        let locationHTML = post.location ? `<div class="post-location">${locationSVG} ${post.location}</div>` : '';
+        document.getElementById('postDetailSection').innerHTML = `
+            <div style="padding: 20px;">
+                <div style="display:flex; gap:15px; margin-bottom:15px;">
+                    <div style="cursor:pointer;" onclick="switchMainView('profile', '${char.id}');">${getAvatarHTML(char, 50)}</div>
+                    <div style="cursor:pointer; flex-grow:1;" onclick="switchMainView('profile', '${char.id}');">
+                        <div style="font-weight:bold; font-size:16px;">${char.name} ${char.verified ? verifiedSVG : ''}</div>
+                        <div style="color:#536471;">${char.handle}</div>
+                    </div>
+                    <div style="display:flex; align-items:center;">
+                        ${followBtnHTML}
+                        <button class="post-delete-btn" onclick="deletePost('${post.id}', event)" title="删除帖子" style="display:block;">🗑️</button>
+                    </div>
+                </div>
+                <div class="post-body" ondblclick="editPost('${post.id}', this); event.stopPropagation();" title="双击可直接修改此帖子" style="font-size:18px; line-height:1.5; margin-bottom:15px;">${formatPostText(post.text)}</div>
+                ${locationHTML}
+                ${mediaHTML}
+                <div style="color:#536471; font-size:14px; border-bottom:1px solid #eff3f4; padding-bottom:15px; display:flex; gap:10px;">
+                    <span class="time-updater" data-timestamp="${post.timestamp}">${timeAgo(post.timestamp)}</span> · 翻译推文
+                </div>
+                <div class="post-footer" style="border-bottom:1px solid #eff3f4; padding-bottom:15px; max-width:100%; justify-content:space-around;">
+                    <div class="stat-item">${commentSVG} ${formatStat(post.stats.comments)}</div>
+                    <div class="stat-item">${retweetSVG} ${formatStat(post.stats.retweets)}</div>
+                    <div class="stat-item">${likeSVG} ${formatStat(post.stats.likes)}</div>
+                    <div class="stat-item">${viewSVG} ${formatStat(post.stats.views)}</div>
+                </div>
+                <div class="comment-input-area">
+                    <div class="comment-input-row">
+                        ${getAvatarHTML(currentUser, 40)}
+                        <input type="text" id="myCommentInput" placeholder="发布你的回复..." onkeypress="if(event.key === 'Enter') postUserComment('${post.id}')">
+                        <button class="btn-edit-small" title="添加表情/图片" onclick="openEmoticonPicker('reply')">🖼️</button>
+                        <button class="btn-primary" style="width:auto; margin-top:0; padding:8px 16px;" onclick="postUserComment('${post.id}')">回复</button>
+                    </div>
+                    <div id="replyAttachmentPreview" class="emo-preview-box" style="display:none; padding-left:50px;"></div>
+                </div>
+                ${repliesHTML}
+            </div>`;
+        document.getElementById('rightPanelTrend').style.display = 'none'; document.getElementById('rightPanelProfile').style.display = 'block';
+        let bgStyle = char.bgImg ? `background-image:url('${char.bgImg}'); background-size:cover; background-position:center;` : `background-color:${char.themeColor};`;
+        document.getElementById('rightPanelProfile').innerHTML = `
+            <div style="${bgStyle} height: 100px; border-radius: 16px 16px 0 0;"></div>
+            <div style="padding: 15px; position: relative;">
+                <div style="position: absolute; top: -40px;">${getAvatarHTML(char, 70)}</div>
+                <div style="display:flex; justify-content:flex-end;">${followBtnHTML}</div>
+                <div style="font-weight:bold; font-size:18px; margin-top:10px;">${char.name} ${char.verified ? verifiedSVG : ''}</div>
+                <div style="color:#536471; font-size:14px;">${char.handle}</div>
+                <div style="font-size: 14px; color: #0f1419; margin: 15px 0; line-height: 1.4;">${char.bio || char.persona || ''}</div>
+                <div style="display:flex; gap:15px; font-size:14px;"><div><b>${char.following || 100}</b> <span style="color:#1d9bf0;">正在关注</span></div><div><b>${char.followers || '1万'}</b> <span style="color:#1d9bf0;">关注者</span></div></div>
+            </div>`;
+    }
+
+    // ======================================================
+    // ===== 核心发帖逻辑：带记忆、世界书与定位参考 =====
+    // ======================================================
+    async function executeGeneration(charsToPost, storyContext = null) {
+        isGenerating = true; 
+        document.getElementById('loadingStatus').style.display = 'block'; 
+        let newPosts = [];
+        let wbContext = getActiveWorldbookText(); 
+        let emoPrompt = getEmoticonPrompt();
+
+        for (let char of charsToPost) {
+            const memoryPart = char.memorySummary ? `\n【近期记忆参考】：${char.memorySummary}` : '';
+            const storyPart = storyContext ? `\n【当前故事背景】：${storyContext}\n请结合故事背景从你的视角发表看法。` : '';
+            
+            let chatSummaryContext = char.chatSummary ? `\n【历史聊天总结】：${char.chatSummary}` : '';
+            const chatPart = `\n【最近对话上下文】：\n${getRecentChatContext(char.id)}`;
+            
+            let p = `你是推特用户"${char.name}"，人设：${char.persona}。
+${wbContext}${memoryPart}${storyPart}${chatSummaryContext}${chatPart}${emoPrompt}
+发一条推文，分享你的见闻或看法，不超过50字。${trendingTags.length>0?`可以考虑加上标签：${trendingTags[0]}`:""}
+【强制要求】：请严格以如下JSON格式返回，不要有任何其他说明：
+{"text":"你的推文内容","image":false,"location":"当前所在的具体地点，若没有可填空字符串","emoticonId":"如果有合适的可用表情包，可以填入其ID，若不需要表情包则填null"}
+如果内容非常适合真实配图，可以返回：
+{"text":"推文内容","image":true,"imageKeyword":"配图关键词英文","location":"具体地点","emoticonId":null}`;
+
+            try {
+                let res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: p }] }) });
+                let data = await res.json(); if(data.error) continue;
+                let raw = data.choices?.[0]?.message?.content?.trim() || "";
+                if(!raw) continue;
+                let parsed; try { const m = raw.match(/\{[\s\S]*\}/); parsed = m ? JSON.parse(m[0]) : { text: raw, image: false }; } catch(e) { parsed = { text: raw, image: false }; }
+                
+                const postText = parsed.text || raw; let mediaUrl = null;
+                if (parsed.image && parsed.imageKeyword) { const seed = Math.abs(parsed.imageKeyword.split('').reduce((a,c)=>a+c.charCodeAt(0),0) + Date.now() % 9999); mediaUrl = `https://picsum.photos/seed/${seed}/500/300`; } 
+                else if (parsed.emoticonId) { let emo = globalEmoticons.find(e => e.id === parsed.emoticonId); if (emo) mediaUrl = emo.url; }
+
+                let newPostId = 'p_' + Date.now() + Math.random().toString(36).substr(2,5);
+                newPosts.push({ id: newPostId, char: {...char}, text: postText, timestamp: Date.now(), replies: [], mediaUrl: mediaUrl, location: parsed.location || char.location || '', userLiked: false, stats: { comments: getRandomStat(500), retweets: getRandomStat(2000), likes: getRandomStat(20000), views: Math.floor(Math.random() * 500000) }, isStory: !!storyContext });
+                if (char.isFollowing) addNotification(`<b>${char.name}</b> 发布了新的动态。`, newPostId);
+            } catch (e) {}
+        }
+        
+        globalPosts = [...newPosts, ...globalPosts];
+        
+        for (let post of newPosts) {
+            let mentions = post.text.match(/@(\w+)/g);
+            if (mentions) {
+                for (let m of mentions) {
+                    let tc = myCharacters.find(c => c.handle.toLowerCase() === m.toLowerCase());
+                    if (tc && tc.id !== post.char.id) {
+                        try {
+                            let rRes = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: myModel, messages: [{ role: "user", content: `你是"${tc.name}"。${emoPrompt}用户@你："${post.text}"。是否回复？回复直接输出内容，如果使用表情包加[EMO:ID]。不回输出"NO"。` }] }) });
+                            let rData = await rRes.json(); let repText = rData.choices?.[0]?.message?.content?.trim() || "";
+                            let repMediaUrl = null; let emoMatch = repText.match(/\[EMO:(emo_\w+)\]/i);
+                            if (emoMatch) { let emo = globalEmoticons.find(e => e.id === emoMatch[1]); if (emo) repMediaUrl = emo.url; repText = repText.replace(emoMatch[0], '').trim(); }
+                            if (!repText.toLowerCase().startsWith("no") && repText !== "") { post.replies.push({ char: {...tc}, text: repText, timestamp: Date.now(), likes: 0, liked: false, mediaUrl: repMediaUrl }); post.stats.comments = parseInt(post.stats.comments)+1||1; if (post.char.isFollowing) addNotification(`<b>${tc.name}</b> 评论了 <b>${post.char.name}</b>。`, post.id); }
+                        } catch(e){}
+                    }
+                }
+            }
+        }
+        
+        document.getElementById('loadingStatus').style.display = 'none'; isGenerating = false;
+        saveAllData();
+        
+        for (let char of charsToPost) { updateCharMemoryAsync(char); }
+        if (document.getElementById('view-home').style.display !== 'none') renderPosts();  
+    }
+
+    // --- 所有弹窗的 JS 函数整合 ---
+    function openFormForCreate() {
+        editingCharId = null; ['charPersona','charName','charHandle','charBio','charFollowers','charFollowing','charLocation','charWebsite','charBirthdate','charAutoReply'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+        document.getElementById('charVerified').checked = false; document.getElementById('charAvatar').value = ''; document.getElementById('charBg').value = '';
+        document.getElementById('freqInterval').value = 1; document.getElementById('freqCount').value = 1; document.getElementById('freqUnit').value = 'day';
+        document.getElementById('chatFreqInterval').value = 0; document.getElementById('chatFreqUnit').value = 'hour';
+        refreshGroupSelect();
+        document.getElementById('charGroup').value = ''; document.getElementById('formTitle').innerText = "创建新 AI 角色"; document.getElementById('saveCharBtn').innerText = "保存并生成角色";
+        document.getElementById('characterListView').style.display = 'none'; document.getElementById('characterFormView').style.display = 'block';
+    }
+
+    function openFormForEdit(id) {
+        saveAllData();
+        editingCharId = id; const char = myCharacters.find(c => c.id === id); if(!char) return;
+        document.getElementById('charPersona').value = char.persona||''; document.getElementById('charName').value = char.name||''; document.getElementById('charHandle').value = char.handle||'';
+        document.getElementById('charBio').value = char.bio||''; document.getElementById('charFollowers').value = char.followers||''; document.getElementById('charFollowing').value = char.following||'';
+        document.getElementById('charLocation').value = char.location||''; document.getElementById('charWebsite').value = char.website||''; document.getElementById('charBirthdate').value = char.birthdate||'';
+        document.getElementById('charVerified').checked = char.verified||false; document.getElementById('charAvatar').value = ''; document.getElementById('charBg').value = '';
+        document.getElementById('freqInterval').value = char.postFreq?.interval || 1; document.getElementById('freqUnit').value = char.postFreq?.unit || 'day'; document.getElementById('freqCount').value = char.postFreq?.count || 1;
+        document.getElementById('chatFreqInterval').value = char.chatFreq?.interval ?? 0; document.getElementById('chatFreqUnit').value = char.chatFreq?.unit || 'hour';
+        document.getElementById('charAutoReply').value = char.autoReplyText || '';
+        refreshGroupSelect(); document.getElementById('charGroup').value = char.group || ''; document.getElementById('formTitle').innerText = "修改资料"; document.getElementById('saveCharBtn').innerText = "保存";
+        document.getElementById('characterListView').style.display = 'none'; document.getElementById('characterFormView').style.display = 'block';
+    }
+
+    function showRoleList() { document.getElementById('characterFormView').style.display = 'none'; document.getElementById('characterListView').style.display = 'block'; renderCenterCharList(); }
+
+    async function saveCharacter() {
+        const p = document.getElementById('charPersona').value.trim(); if (!p) return alert("角色人设为必填项！"); if (!myApiKey) return alert("请先在设置中填写 API Key！");
+        const btn = document.getElementById('saveCharBtn'); btn.innerText = "处理中... ⏳"; btn.disabled = true;
+        let freqObj = { interval: parseInt(document.getElementById('freqInterval').value)||1, unit: document.getElementById('freqUnit').value, count: parseInt(document.getElementById('freqCount').value)||1 };
+        let chatFreqObj = { interval: parseInt(document.getElementById('chatFreqInterval').value)||0, unit: document.getElementById('chatFreqUnit').value };
+        const autoReplyVal = document.getElementById('charAutoReply').value.trim();
+        const nameVal = document.getElementById('charName').value.trim(); const selectedGroup = document.getElementById('charGroup').value;
+        const prompt = `根据人设补全资料。【人设】：${p}\n${nameVal ? `已知名字[${nameVal}]` : '请生成一个合适的中文名字'}\n严格返回JSON格式，不要有任何额外说明：{"name":"名字","handle":"@英文ID","followers":1000,"following":100,"bio":"简介","location":"城市","website":"网址或空字符串","birthdate":"1990-01-01","verified":false,"avatarEmoji":"😊","themeColor":"#1d9bf0"${editingCharId?"":`,"trendingTag":"#热门标签"`}}`;
+        
+        let aiData = {};
+        try {
+            const res = await fetch(`${myApiUrl}/chat/completions`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${myApiKey}` }, body: JSON.stringify({ model: 'deepseek-chat', messages: [{ role: "user", content: prompt }] }) });
+            const data = await res.json(); 
+            if (data.error) throw new Error(data.error.message || 'API错误');
+            let raw = data.choices?.[0]?.message?.content;
+            if (!raw) throw new Error('API未返回有效内容');
+            let jsonMatch = raw.match(/\{[\s\S]*\}/); 
+            if (jsonMatch) aiData = JSON.parse(jsonMatch[0]);
+        } catch (e) { 
+            // 如果是创建新角色且 AI 失败，则中断。若是编辑角色，则仅报错但不中断，保留本地修改继续执行
+            if (!editingCharId) {
+                alert("出错：" + e.message);
+                btn.innerText = "保存并生成角色"; btn.disabled = false;
+                return;
+            }
+            console.warn("AI 补全内容失败，将仅保存表单中填写的数据", e);
+        }
+
+        try {
+            let a64 = null, b64 = null;
+            if (document.getElementById('charAvatar').files[0]) a64 = await fileToBase64(document.getElementById('charAvatar').files[0]);
+            if (document.getElementById('charBg').files[0]) b64 = await fileToBase64(document.getElementById('charBg').files[0]);
+            let oldChar = editingCharId ? (myCharacters.find(c => c.id === editingCharId) || {}) : {}; const newId = editingCharId || Date.now();
+            const fc = {
+                id: newId, persona: p, isFollowing: oldChar.isFollowing || false, isSpecialFollow: oldChar.isSpecialFollow || false, name: nameVal || aiData.name || oldChar.name || '新角色',
+                handle: (() => { let h = document.getElementById('charHandle').value.trim() || aiData.handle || oldChar.handle || '@newuser'; return h.startsWith('@') ? h : '@' + h; })(),
+                followers: document.getElementById('charFollowers').value || aiData.followers || oldChar.followers || 100, following: document.getElementById('charFollowing').value || aiData.following || oldChar.following || 50,
+                bio: document.getElementById('charBio').value || aiData.bio || oldChar.bio || '', location: document.getElementById('charLocation').value || aiData.location || oldChar.location || '',
+                website: document.getElementById('charWebsite').value || aiData.website || oldChar.website || '', birthdate: document.getElementById('charBirthdate').value || aiData.birthdate || oldChar.birthdate || '',
+                verified: document.getElementById('charVerified').checked, avatarEmoji: aiData.avatarEmoji || oldChar.avatarEmoji || '👤', themeColor: aiData.themeColor || oldChar.themeColor || '#1d9bf0',
+                avatarImg: a64 || oldChar.avatarImg || null, bgImg: b64 || oldChar.bgImg || null, postFreq: freqObj, lastPostTime: oldChar.lastPostTime || Date.now(),
+                chatFreq: chatFreqObj, lastChatProactiveTime: oldChar.lastChatProactiveTime || Date.now(), autoReplyText: autoReplyVal,
+                group: selectedGroup || '', memorySummary: oldChar.memorySummary || '', chatSummary: oldChar.chatSummary || ''
+            };
+            if (editingCharId) { const idx = myCharacters.findIndex(c => c.id === editingCharId); if (idx !== -1) myCharacters[idx] = fc; globalPosts.forEach(post => { if (post.char.id === fc.id) post.char = { ...fc }; post.replies.forEach(r => { if (r.char.id === fc.id) r.char = { ...fc }; }); }); } 
+            else { myCharacters.push(fc);if (aiData.trendingTag) { trendingTags.unshift(aiData.trendingTag); renderTrends(); } }
+            renderCenterCharList(); showRoleList(); if (currentProfileId == fc.id) renderProfilePage(fc.id); if (document.getElementById('view-home').style.display !== 'none') renderPosts();
+            alert(editingCharId ? "角色资料已更新！" : `角色"${fc.name}"创建成功！`);
+        } catch(e) { console.error(e); } finally { btn.innerText = editingCharId ? "保存" : "保存并生成角色"; btn.disabled = false; }
+        
+        saveAllData(); 
+        renderCenterCharList();
+    }
+
+    function openCharacterCenter() {
+        renderCenterCharList();
+        openModal('characterCenterModal');
+    }
+
+    function renderCenterCharList() {
+        const container = document.getElementById('centerCharListContainer');
+        if (!container) return;
+        let list = (typeof activeGroupFilter !== 'undefined' && activeGroupFilter !== null) 
+                   ? myCharacters.filter(c => c.group === activeGroupFilter) 
+                   : myCharacters;
+        if (list.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无角色，去创建一个吧！</div>';
+            return;
+        }
+        container.innerHTML = list.map(char => `
+            <div class="center-char-item">
+                <div class="char-info-wrapper">
+                    ${getAvatarHTML(char, 40)}
+                    <div>
+                        <div style="font-weight:bold;">${char.name}</div>
+                        <div style="font-size:12px; color:#536471;">${char.handle}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-edit-small" onclick="openFormForEdit(${char.id})">编辑</button>
+                    <button class="btn-edit-small" style="color:#f91880; border-color:#f91880;" onclick="deleteCharacter(${char.id})">删除</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function deleteCharacter(id) {
+        if (!confirm("确定要删除这个角色吗？此操作无法撤销。")) return;
+        myCharacters = myCharacters.filter(c => c.id !== id);
+        renderCenterCharList();
+        saveAllData();
+    }
+
+    function openNewspaperModal() {
+        const c = document.getElementById('newspaperCharList');
+        if (c) {
+            c.innerHTML = myCharacters.map(char => `
+                <div class="char-checkbox-item">
+                    <input type="checkbox" id="n_pick_${char.id}" value="${char.id}">
+                    <label for="n_pick_${char.id}">${getAvatarHTML(char, 28)} ${char.name}</label>
+                </div>`).join('');
+        }
+        openModal('newspaperModal');
+    }
+
+    async function runNewspaper() {
+        const story = document.getElementById('newspaperStory').value.trim();
+        const progressEl = document.getElementById('newspaperProgress');
+        const selectedIds = [...document.querySelectorAll('#newspaperCharList input[type=checkbox]:checked')].map(cb => parseInt(cb.value));
+
+        if (!story) return alert("请输入故事梗概！");
+        if (selectedIds.length === 0) return alert("请至少选择一个参与角色！");
+
+        progressEl.innerText = "⏳ AI 正在根据故事撰写推文...";
+        document.getElementById('newspaperRunBtn').disabled = true;
+
+        const chars = selectedIds.map(id => myCharacters.find(c => c.id === id)).filter(Boolean);
+        await executeGeneration(chars, story);
+
+        progressEl.innerText = "✅ 发布成功！";
+        document.getElementById('newspaperRunBtn').disabled = false;
+        
+        setTimeout(() => {
+            closeModal('newspaperModal');
+            progressEl.innerText = "";
+            document.getElementById('newspaperStory').value = "";
+        }, 2000);
+    }
+
+    function selectAllNewspaper() { document.querySelectorAll('#newspaperCharList input[type=checkbox]').forEach(cb => cb.checked = true); }
+    function clearAllNewspaper() { document.querySelectorAll('#newspaperCharList input[type=checkbox]').forEach(cb => cb.checked = false); }
+    
+    function addNotification(text, postId, chatCharId = null) {
+        globalNotifications.unshift({ text: text, postId: postId, chatCharId: chatCharId, timestamp: Date.now() });
+        unreadNotifs++;
+        updateNotifBadge();
+        saveAllData();
+    }
+
+    function updateNotifBadge() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) {
+            badge.style.display = unreadNotifs > 0 ? 'inline-block' : 'none';
+            badge.innerText = unreadNotifs;
+        }
+    }
+
+    function handleNotificationClick(postId, chatCharId) {
+        if (chatCharId) {
+            switchMainView('chat');
+            switchChatSession(chatCharId);
+        } else if (postId) {
+            switchMainView('postDetail', postId);
+        }
+    }
+
+    function renderNotifications() {
+        const container = document.getElementById('notificationsSection');
+        if (!container) return;
+        if (globalNotifications.length === 0) {
+            container.innerHTML = '<div class="empty-state">暂无新通知。</div>';
+            return;
+        }
+        container.innerHTML = globalNotifications.map(n => `
+            <div class="notification-item" onclick="handleNotificationClick(${n.postId ? `'${n.postId}'` : 'null'}, ${n.chatCharId ? `'${n.chatCharId}'` : 'null'})">
+                <div style="font-size: 20px; margin-right: 12px;">${n.chatCharId ? '💬' : '🔔'}</div>
+                <div style="flex:1;">
+                    <div style="font-size: 15px; margin-bottom: 4px;">${n.text}</div>
+                    <div style="color: #536471; font-size: 13px;">${timeAgo(n.timestamp)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+</script>
+</body>
+</html>
